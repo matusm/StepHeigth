@@ -19,7 +19,6 @@ namespace StepHeight
             var options = new Options();
             if (!CommandLine.Parser.Default.ParseArgumentsStrict(args, options))
                 Console.WriteLine("*** ParseArgumentsStrict returned false");
-            // consume the verbosity option
             if (options.BeQuiet == true)
                 ConsoleUI.BeSilent();
             else
@@ -112,7 +111,7 @@ namespace StepHeight
             Console.WriteLine($"Average filtered height: {filteredResults.Average():F1} nm");
             Console.WriteLine();
 
-            fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(275), left, right);
+            fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(275), options.LeftX * 1e6, options.RightX * 1e6);
 
             foreach (var point in fitVerticalStandard.Residuals)
             {
@@ -120,6 +119,12 @@ namespace StepHeight
             }
 
 
+        }
+
+        static string ResultString(FitVerticalStandard fts)
+        {
+
+            return "";
         }
 
         static FeatureType GetFeatureTypeFor(int index)
