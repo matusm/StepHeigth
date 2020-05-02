@@ -85,39 +85,12 @@ namespace StepHeight
 
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
-
                 fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e6, options.RightX*1e6);
                 if(fitVerticalStandard.RangeOfResiduals < options.MaxSpan*1e-6)
                 {
-                    Console.WriteLine(ToResultString(fitVerticalStandard, i));
+                    Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
                 }
             }
-        }
-
-        static string ToResultString(FitVerticalStandard fts, int profileIndex)
-        {
-            string retString = "";
-            double h = fts.Height * 1e9;
-            double pt = fts.Pt * 1e9;
-            double res = fts.RangeOfResiduals * 1e9;
-            double r = fts.A2Radius * 1e6;
-            double asy = fts.A2Asymmetry;
-            switch (fts.FeatureType)
-            {
-                case FeatureType.A1Groove:
-                case FeatureType.A1Ridge:
-                case FeatureType.FallingEdge:
-                case FeatureType.RisingEdge:
-                    // output for rectangular (flat toped) features
-                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1}";
-                    break;
-                case FeatureType.A2Groove:
-                case FeatureType.A2Ridge:
-                    // output for cylindrical features
-                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1} {r,8:F1} {asy,6:F3}";
-                    break;
-            }
-            return retString;
         }
 
         static FeatureType GetFeatureTypeFor(int index)

@@ -66,6 +66,33 @@ namespace StepHeight
             }
         }
 
+        public string ToFormattedString(int profileIndex)
+        {
+            string retString = "";
+            double h = Height * 1e9;
+            double pt = Pt * 1e9;
+            double res = RangeOfResiduals * 1e9;
+            double r = A2Radius * 1e6;
+            double asy = A2Asymmetry;
+            switch (FeatureType)
+            {
+                case FeatureType.A1Groove:
+                case FeatureType.A1Ridge:
+                case FeatureType.FallingEdge:
+                case FeatureType.RisingEdge:
+                    // output for rectangular (flat toped) features
+                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1}";
+                    break;
+                case FeatureType.A2Groove:
+                case FeatureType.A2Ridge:
+                    // output for cylindrical features
+                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1} {r,8:F1} {asy,6:F3}";
+                    break;
+            }
+            return retString;
+        }
+
+
         #endregion
 
         #region Private methods
