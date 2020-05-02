@@ -82,7 +82,7 @@ namespace StepHeight
             //double right = 0.001379;
             //double left = 0.000150;
             //double right = 0.000250;
-
+            FitStatistics fs = new FitStatistics();
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
                 fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e6, options.RightX*1e6);

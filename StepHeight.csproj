@@ -44,6 +44,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="MyLibs\ConsoleUI.cs" />
     <Compile Include="FitVerticalStandard.cs" />
+    <Compile Include="FitStatistics.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
