@@ -69,26 +69,16 @@ namespace StepHeight
                 ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReader.Status}", 2);
             #endregion
 
-            // now comes the real work
-
-            Console.WriteLine($"X dimension: {bcrReader.RasterData.ScanFieldDimensionX * 1000:F3} mm");
-            Console.WriteLine($"Y dimension: {bcrReader.RasterData.ScanFieldDimensionY * 1000:F3} mm");
-            Console.WriteLine();
-
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
-            //double left = 0.000179;
-            //double right = 0.000340;
-            //double left  = 0.001133;
-            //double right = 0.001379;
-            //double left = 0.000150;
-            //double right = 0.000250;
-            FitStatistics fs = new FitStatistics();
+            FitStatistics fitStatistics = new FitStatistics();
+
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
                 fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e6, options.RightX*1e6);
                 if(fitVerticalStandard.RangeOfResiduals < options.MaxSpan*1e-6)
                 {
                     Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
+                    fitStatistics.Update(fitVerticalStandard);
                 }
             }
         }

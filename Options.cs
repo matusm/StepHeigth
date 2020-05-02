@@ -6,6 +6,9 @@ namespace StepHeight
 {
     public class Options
     {
+        [Option("type", DefaultValue = 1, HelpText = "feature type to be fitted")]
+        public int TypeIndex { get; set; }
+
         [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first edge of feature.")]
         public double LeftX { get; set; }
 
@@ -27,17 +30,11 @@ namespace StepHeight
         [Option("comment", DefaultValue = "", HelpText = "User supplied comment string.")]
         public string UserComment { get; set; }
 
-        [Option('p', "profile", DefaultValue = 0, HelpText = "Extract single profile.")]
-        public int ProfileIndex { get; set; }
-
         [Option("maxspan", DefaultValue = 0.0, HelpText = "Discard fit if residuals are larger, in um")]
         public double MaxSpan { get; set; }
 
         [Option("precision", DefaultValue = 4, HelpText = "Decimal digits for results")]
         public int Precision { get; set; }
-
-        [Option("type", DefaultValue = 1, HelpText = "feature type to be fitted")]
-        public int TypeIndex { get; set; }
 
         [ValueList(typeof(List<string>), MaximumElements = 3)]
         public IList<string> ListOfFileNames { get; set; }
