@@ -83,48 +83,41 @@ namespace StepHeight
             //double left = 0.000150;
             //double right = 0.000250;
 
-            List<double> results = new List<double>();
-            List<double> filteredResults = new List<double>();
-
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
 
                 fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e6, options.RightX*1e6);
-                double h = fitVerticalStandard.Height * 1e9;
-                double pt = fitVerticalStandard.Pt * 1e9;
-                double res = fitVerticalStandard.RangeOfResiduals * 1e9;
-                double r = fitVerticalStandard.A2Radius * 1e6;
-
-                Console.WriteLine($"profile {i,5} | hight: {h:F1} nm | Pt: {pt:F1} nm | res: {res,6:F1} nm");
-                results.Add(h);
-                if (res < 100.0)
+                if(fitVerticalStandard.RangeOfResiduals < options.MaxSpan*1e-6)
                 {
-                    filteredResults.Add(h);
-                }
-                else
-                {
-                    Console.WriteLine("discarded!");
+                    Console.WriteLine(ToResultString(fitVerticalStandard, i));
                 }
             }
-            Console.WriteLine();
-            Console.WriteLine($"Average height: {results.Average():F1} nm");
-            Console.WriteLine($"Average filtered height: {filteredResults.Average():F1} nm");
-            Console.WriteLine();
-
-            fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(275), options.LeftX * 1e6, options.RightX * 1e6);
-
-            foreach (var point in fitVerticalStandard.Residuals)
-            {
-                Console.WriteLine($"{point.X * 1e6,6:F1} µm {point.Z * 1e9,8:F1} nm");
-            }
-
-
         }
 
-        static string ResultString(FitVerticalStandard fts)
+        static string ToResultString(FitVerticalStandard fts, int profileIndex)
         {
-
-            return "";
+            string retString = "";
+            double h = fts.Height * 1e9;
+            double pt = fts.Pt * 1e9;
+            double res = fts.RangeOfResiduals * 1e9;
+            double r = fts.A2Radius * 1e6;
+            double asy = fts.A2Asymmetry;
+            switch (fts.FeatureType)
+            {
+                case FeatureType.A1Groove:
+                case FeatureType.A1Ridge:
+                case FeatureType.FallingEdge:
+                case FeatureType.RisingEdge:
+                    // output for rectangular (flat toped) features
+                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1}";
+                    break;
+                case FeatureType.A2Groove:
+                case FeatureType.A2Ridge:
+                    // output for cylindrical features
+                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1} {r,8:F1} {asy,6:F3}";
+                    break;
+            }
+            return retString;
         }
 
         static FeatureType GetFeatureTypeFor(int index)
