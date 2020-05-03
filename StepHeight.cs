@@ -74,7 +74,7 @@ namespace StepHeight
 
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
-                fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e6, options.RightX*1e6);
+                fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e-6, options.RightX*1e-6);
                 if(fitVerticalStandard.RangeOfResiduals < options.MaxSpan*1e-6)
                 {
                     Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
@@ -82,7 +82,7 @@ namespace StepHeight
                 }
             }
             Console.WriteLine();
-            Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight*1e9,6:F1} ± {fitStatistics.HeightRange*1e9:F1}");
+            Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight*1e9,6:F2} ± {fitStatistics.HeightRange*0.5e9:F2}");
         }
 
 

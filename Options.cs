@@ -30,7 +30,7 @@ namespace StepHeight
         [Option("comment", DefaultValue = "", HelpText = "User supplied comment string.")]
         public string UserComment { get; set; }
 
-        [Option("maxspan", DefaultValue = 0.0, HelpText = "Discard fit if residuals are larger, in um")]
+        [Option("maxspan", DefaultValue = 1.0, HelpText = "Discard fit if residuals are larger, in um")]
         public double MaxSpan { get; set; }
 
         [Option("precision", DefaultValue = 4, HelpText = "Decimal digits for results")]
