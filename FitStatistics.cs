@@ -5,13 +5,16 @@ namespace StepHeight
 {
     public class FitStatistics
     {
+
+        private FitVerticalStandard fvs;
         private List<double> h = new List<double>();
         private List<double> pt = new List<double>();
         private List<double> r = new List<double>();
         private List<double> res = new List<double>();
 
-        public FitStatistics()
+        public FitStatistics(FitVerticalStandard fvs)
         {
+            this.fvs = fvs; 
             Restart();
         }
 
@@ -24,7 +27,7 @@ namespace StepHeight
         public double A2RadiusRange => r.Max() - r.Min();
         public double AverageResiduals => res.Average();
 
-        public void Update(FitVerticalStandard fvs)
+        public void Update()
         {
             h.Add(fvs.Height);
             pt.Add(fvs.Pt);

@@ -70,7 +70,7 @@ namespace StepHeight
             #endregion
 
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
-            FitStatistics fitStatistics = new FitStatistics();
+            FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
 
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
@@ -78,10 +78,15 @@ namespace StepHeight
                 if(fitVerticalStandard.RangeOfResiduals < options.MaxSpan*1e-6)
                 {
                     Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
-                    fitStatistics.Update(fitVerticalStandard);
+                    fitStatistics.Update();
                 }
             }
+            Console.WriteLine();
+            Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight*1e9,6:F1} ± {fitStatistics.HeightRange*1e9:F1}");
         }
+
+
+        //=====================================================================
 
         static FeatureType GetFeatureTypeFor(int index)
         {
@@ -103,5 +108,8 @@ namespace StepHeight
                     return FeatureType.None;
             }
         }
+
+        //=====================================================================
+
     }
 }
