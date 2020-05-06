@@ -30,6 +30,7 @@ namespace StepHeight
         public double DomainLengthE { get; private set; }         // normalized overall evaluation length (3)
         // computed properties after calling FitProfile
         public double FeatureWidth { get; private set; }    // feature width, W
+        public double Yposition { get; private set; }       // position of profile in transverse direction
         public double Height { get; private set; }          // height of the feature as obtained by fit
         public double Pt { get; private set; }              // Pt as obtained by fit
         public double A2Radius { get; private set; }        // geometry parameter for A2 standards
@@ -48,6 +49,8 @@ namespace StepHeight
         {
             ResetProperties();
             Point3D[] filteredProfile = RemoveBadPoints(profile);
+            if (filteredProfile.Length == 0) return;
+            Yposition = filteredProfile[0].Y;
             // probably one should center the profile in x and z direction
             switch (FeatureType)
             {
@@ -69,10 +72,11 @@ namespace StepHeight
         public string ToFormattedString(int profileIndex)
         {
             string retString = "";
-            double h = Height * 1e9;
-            double pt = Pt * 1e9;
-            double res = RangeOfResiduals * 1e9;
-            double r = A2Radius * 1e6;
+            double h = Height * 1e9;    // nm
+            double pt = Pt * 1e9;       // nm
+            double res = RangeOfResiduals * 1e9;    // nm
+            double r = A2Radius * 1e6;  // µm
+            double y = Yposition * 1e6; // µm
             double asy = A2Asymmetry;
             switch (FeatureType)
             {
@@ -81,12 +85,12 @@ namespace StepHeight
                 case FeatureType.FallingEdge:
                 case FeatureType.RisingEdge:
                     // output for rectangular (flat toped) features
-                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1}";
+                    retString = $"{profileIndex,5} {y,8:F2} {h,8:F1} {pt,8:F1} {res,8:F1}";
                     break;
                 case FeatureType.A2Groove:
                 case FeatureType.A2Ridge:
                     // output for cylindrical features
-                    retString = $"{profileIndex,5} {h,8:F1} {pt,8:F1} {res,8:F1} {r,8:F1} {asy,6:F3}";
+                    retString = $"{profileIndex,5} {y,8:F2} {h,8:F1} {pt,8:F1} {res,8:F1} {r,8:F1} {asy,6:F3}";
                     break;
             }
             return retString;
@@ -434,6 +438,7 @@ namespace StepHeight
             ProfileTooShort = false;
             RangeOfResiduals = double.NaN;
             FeatureWidth = double.NaN;
+            Yposition = double.NaN;
             Height = double.NaN;
             Pt = double.NaN;
             A2Asymmetry = double.NaN;
