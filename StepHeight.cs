@@ -71,7 +71,7 @@ namespace StepHeight
 
             #region Y-band logic
             double yStart = options.Y0 * 1e-6;              // in m, ignore profiles with y less than this value
-            double yEnd = yStart + options.DeltaY * 1 - 6;  // in m, ignore profiles with y greater than this value
+            double yEnd = yStart + options.DeltaY * 1e-6;  // in m, ignore profiles with y greater than this value
             if (yStart > yEnd)
             {
                 double yTemp = yEnd;
