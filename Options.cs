@@ -6,28 +6,34 @@ namespace StepHeight
 {
     public class Options
     {
-        [Option("type", DefaultValue = 1, HelpText = "feature type to be fitted")]
+        [Option("type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
         public int TypeIndex { get; set; }
 
-        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first edge of feature.")]
+        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first edge of feature, in um")]
         public double LeftX { get; set; }
 
-        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second edge of feature.")]
+        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second edge of feature, in um")]
         public double RightX { get; set; }
 
-        [Option("W1", DefaultValue = 3.0, HelpText = "Parameter W1 of evaluation region.")]
+        [Option("W1", DefaultValue = 3.0, HelpText = "Parameter W1 of evaluation region")]
         public double W1 { get; set; }
 
-        [Option("W2", DefaultValue = (2.0 / 3.0), HelpText = "Parameter W2 of evaluation region.")]
+        [Option("W2", DefaultValue = (2.0 / 3.0), HelpText = "Parameter W2 of evaluation region")]
         public double W2 { get; set; }
 
-        [Option("W3", DefaultValue = (1.0 / 3.0), HelpText = "Parameter W3 of evaluation region.")]
+        [Option("W3", DefaultValue = (1.0 / 3.0), HelpText = "Parameter W3 of evaluation region")]
         public double W3 { get; set; }
 
-        [Option('q', "quiet", HelpText = "Quiet mode. No screen output (except for errors).")]
+        [Option("Y0", DefaultValue = 0.0, HelpText = "y-value of first profile, in um")]
+        public double Y0 { get; set; }
+
+        [Option("Ywidth", DefaultValue = double.MaxValue, HelpText = "Width of y band to evaluate, in um")]
+        public double DeltaY { get; set; }
+
+        [Option('q', "quiet", HelpText = "Quiet mode. No screen output (except for errors)")]
         public bool BeQuiet { get; set; }
 
-        [Option("comment", DefaultValue = "", HelpText = "User supplied comment string.")]
+        [Option("comment", DefaultValue = "", HelpText = "User supplied comment string")]
         public string UserComment { get; set; }
 
         [Option("maxspan", DefaultValue = 1.0, HelpText = "Discard fit if residuals are larger, in um")]

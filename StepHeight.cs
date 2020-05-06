@@ -69,20 +69,36 @@ namespace StepHeight
                 ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReader.Status}", 2);
             #endregion
 
+            #region Y-band logic
+            double yStart = options.Y0 * 1e-6;              // in m, ignore profiles with y less than this value
+            double yEnd = yStart + options.DeltaY * 1 - 6;  // in m, ignore profiles with y greater than this value
+            if (yStart > yEnd)
+            {
+                double yTemp = yEnd;
+                yEnd = yStart;
+                yStart = yTemp;
+            }
+            #endregion
+
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
 
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
-                fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX*1e-6, options.RightX*1e-6);
-                if(fitVerticalStandard.RangeOfResiduals < options.MaxSpan*1e-6)
+                double y = bcrReader.GetPointFor(0, i).Y;
+                if (y >= yStart && y <= yEnd)
                 {
-                    Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
-                    fitStatistics.Update();
+                    fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX * 1e-6, options.RightX * 1e-6);
+                    if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
+                    {
+                        Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
+                        fitStatistics.Update();
+                    }
                 }
             }
+
             Console.WriteLine();
-            Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight*1e9,6:F2} ± {fitStatistics.HeightRange*0.5e9:F2}");
+            Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight * 1e9,6:F2} ± {fitStatistics.HeightRange * 0.5e9:F2}");
         }
 
 
