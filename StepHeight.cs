@@ -40,22 +40,22 @@ namespace StepHeight
                 //inputFileName = @"SHS80_2020_06.sdf";
                 ConsoleUI.ErrorExit("!Missing file name", 1);
             }
+            if (Path.GetExtension(fileNames[0]) == string.Empty)
+                inputFileName = Path.ChangeExtension(fileNames[0], inputFileExtension);
+            else
+                inputFileName = fileNames[0];
             if (fileNames.Length == 1)
             { // one filename given
-                //TODO check if extension present
-                inputFileName = Path.ChangeExtension(fileNames[0], inputFileExtension);
                 outputFileName = Path.ChangeExtension(fileNames[0], outputFileExtension);
                 residualsFileName = Path.ChangeExtension(fileNames[0], residualsFileExtension); ;
             }
             if (fileNames.Length == 2)
-            { // more than one filename
-                inputFileName = Path.ChangeExtension(fileNames[0], inputFileExtension);
+            { // two filenames given
                 outputFileName = Path.ChangeExtension(fileNames[1], outputFileExtension);
                 residualsFileName = Path.ChangeExtension(fileNames[1], residualsFileExtension);
             }
             if (fileNames.Length >= 2)
-            { // more than one filename
-                inputFileName = Path.ChangeExtension(fileNames[0], inputFileExtension);
+            { // three filenames given
                 outputFileName = Path.ChangeExtension(fileNames[1], outputFileExtension);
                 residualsFileName = Path.ChangeExtension(fileNames[2], residualsFileExtension);
             }
@@ -71,7 +71,7 @@ namespace StepHeight
 
             #region Y-band logic
             double yStart = options.Y0 * 1e-6;              // in m, ignore profiles with y less than this value
-            double yEnd = yStart + options.DeltaY * 1e-6;  // in m, ignore profiles with y greater than this value
+            double yEnd = yStart + (options.DeltaY * 1e-6); // in m, ignore profiles with y greater than this value
             if (yStart > yEnd)
             {
                 double yTemp = yEnd;
