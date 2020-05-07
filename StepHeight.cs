@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Bev.IO.BcrReader;
 using Bev.SurfaceRasterData;
@@ -18,7 +19,7 @@ namespace StepHeight
             // parse command line arguments
             var options = new Options();
             if (!CommandLine.Parser.Default.ParseArgumentsStrict(args, options))
-                Console.WriteLine("*** ParseArgumentsStrict returned false");
+                ConsoleUI.WriteLine("*** ParseArgumentsStrict returned false");
             if (options.BeQuiet == true)
                 ConsoleUI.BeSilent();
             else
@@ -80,9 +81,10 @@ namespace StepHeight
             }
             #endregion
 
+            #region Fit requested profiles
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
-
+            StringBuilder fittedProfilsResult = new StringBuilder();
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
                 double y = bcrReader.GetPointFor(0, i).Y;
@@ -91,11 +93,20 @@ namespace StepHeight
                     fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX * 1e-6, options.RightX * 1e-6);
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
-                        Console.WriteLine(fitVerticalStandard.ToFormattedString(i));
+                        string resultLine = fitVerticalStandard.ToFormattedString(i);
+                        ConsoleUI.WriteLine($" > {resultLine}");
+                        fittedProfilsResult.AppendLine(resultLine);
                         fitStatistics.Update();
                     }
                 }
             }
+            if (fitStatistics.NumberOfSamples == 0)
+                ConsoleUI.ErrorExit("!No valid profile fit found", 3);
+            if (fitStatistics.NumberOfSamples == 1)
+                ConsoleUI.WriteLine("1 profile fitted.");
+            if (fitStatistics.NumberOfSamples > 1)
+                ConsoleUI.WriteLine($"{fitStatistics.NumberOfSamples} profiles fitted.");
+            #endregion
 
             Console.WriteLine();
             Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight * 1e9,6:F2} ± {fitStatistics.HeightRange * 0.5e9:F2}");

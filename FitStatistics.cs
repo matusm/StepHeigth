@@ -33,6 +33,7 @@ namespace StepHeight
             pt.Add(fvs.Pt);
             res.Add(fvs.RangeOfResiduals);
             r.Add(fvs.A2Radius);
+            //TODO average residuals profile
         }
 
         public void Restart()
