@@ -6,7 +6,7 @@ namespace StepHeight
 {
     public class Options
     {
-        [Option("type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
+        [Option('t', "type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
         public int TypeIndex { get; set; }
 
         [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first edge of feature, in um")]
@@ -36,11 +36,19 @@ namespace StepHeight
         [Option("comment", DefaultValue = "", HelpText = "User supplied comment string")]
         public string UserComment { get; set; }
 
-        [Option("maxspan", DefaultValue = 1.0, HelpText = "Discard fit if residuals are larger, in um")]
+        [Option("maxspan", DefaultValue = 0.1, HelpText = "Discard fit if residuals are larger, in um")]
         public double MaxSpan { get; set; }
 
         [Option("precision", DefaultValue = 4, HelpText = "Decimal digits for results")]
         public int Precision { get; set; }
+
+        [Option("outextension", DefaultValue = "prn", HelpText = "Extension for output file")]
+        public string OutFileExt { get; set; }
+
+        [Option("resextension", DefaultValue = "txt", HelpText = "Extension for residual file")]
+        public string ResFileExt { get; set; }
+
+
 
         [ValueList(typeof(List<string>), MaximumElements = 3)]
         public IList<string> ListOfFileNames { get; set; }

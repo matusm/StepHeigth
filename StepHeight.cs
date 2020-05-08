@@ -28,37 +28,31 @@ namespace StepHeight
 
             #region File name logic
             const string inputFileExtension = "sdf";
-            const string outputFileExtension = "prn";
-            const string residualsFileExtension = "txt";
             string inputFileName = "";
             string outputFileName = "";
             string residualsFileName = "";
             // get the filename(s) from command line
             string[] fileNames = options.ListOfFileNames.ToArray();
             if (fileNames.Length == 0)
-            {
-                //inputFileName = @"Halle1001_2015_05.sdf";
-                //inputFileName = @"SHS80_2020_06.sdf";
                 ConsoleUI.ErrorExit("!Missing file name", 1);
-            }
             if (Path.GetExtension(fileNames[0]) == string.Empty)
                 inputFileName = Path.ChangeExtension(fileNames[0], inputFileExtension);
             else
                 inputFileName = fileNames[0];
             if (fileNames.Length == 1)
             { // one filename given
-                outputFileName = Path.ChangeExtension(fileNames[0], outputFileExtension);
-                residualsFileName = Path.ChangeExtension(fileNames[0], residualsFileExtension); ;
+                outputFileName = Path.ChangeExtension(fileNames[0], options.OutFileExt);
+                residualsFileName = Path.ChangeExtension(fileNames[0], options.ResFileExt); ;
             }
             if (fileNames.Length == 2)
             { // two filenames given
-                outputFileName = Path.ChangeExtension(fileNames[1], outputFileExtension);
-                residualsFileName = Path.ChangeExtension(fileNames[1], residualsFileExtension);
+                outputFileName = Path.ChangeExtension(fileNames[1], options.OutFileExt);
+                residualsFileName = Path.ChangeExtension(fileNames[1], options.ResFileExt);
             }
             if (fileNames.Length >= 2)
             { // three filenames given
-                outputFileName = Path.ChangeExtension(fileNames[1], outputFileExtension);
-                residualsFileName = Path.ChangeExtension(fileNames[2], residualsFileExtension);
+                outputFileName = Path.ChangeExtension(fileNames[1], options.OutFileExt);
+                residualsFileName = Path.ChangeExtension(fileNames[2], options.ResFileExt);
             }
             #endregion
 
@@ -81,8 +75,22 @@ namespace StepHeight
             }
             #endregion
 
-            #region Fit requested profiles
+            #region Diagnostic output
+            // this is needed for feature type designation
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
+            ConsoleUI.WriteLine($"Number of profiles in scan: {bcrReader.NumProfiles}");
+            ConsoleUI.WriteLine($"Feature type: {fitVerticalStandard.FeatureTypeDesignation}");
+            ConsoleUI.WriteLine($"W1: {options.W1}");
+            ConsoleUI.WriteLine($"W2: {options.W2}");
+            ConsoleUI.WriteLine($"W3: {options.W3}");
+            ConsoleUI.WriteLine($"Position, left edge: {options.LeftX} µm");
+            ConsoleUI.WriteLine($"Position, right edge: {options.RightX} µm");
+            ConsoleUI.WriteLine($"y-value of first profile {options.Y0} µm");
+            ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} µm");
+            ConsoleUI.WriteLine($"Threshold for residuals: {options.MaxSpan} µm");
+            #endregion
+
+            #region Fit requested profiles
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
             for (int i = 0; i < bcrReader.NumProfiles; i++)
