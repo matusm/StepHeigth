@@ -76,29 +76,31 @@ namespace StepHeight
             #endregion
 
             #region Diagnostic output
-            // this is needed for feature type designation
+            // this is needed for getting the feature type designation
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
             ConsoleUI.WriteLine($"Number of profiles in scan: {bcrReader.NumProfiles}");
             ConsoleUI.WriteLine($"Feature type: {fitVerticalStandard.FeatureTypeDesignation}");
             ConsoleUI.WriteLine($"W1: {options.W1}");
             ConsoleUI.WriteLine($"W2: {options.W2}");
             ConsoleUI.WriteLine($"W3: {options.W3}");
-            ConsoleUI.WriteLine($"Position, left edge: {options.LeftX} µm");
-            ConsoleUI.WriteLine($"Position, right edge: {options.RightX} µm");
+            ConsoleUI.WriteLine($"Position of left edge: {options.LeftX} µm");
+            ConsoleUI.WriteLine($"Position of right edge: {options.RightX} µm");
             ConsoleUI.WriteLine($"y-value of first profile {options.Y0} µm");
             ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} µm");
-            ConsoleUI.WriteLine($"Threshold for residuals: {options.MaxSpan} µm");
+            ConsoleUI.WriteLine($"Residual threshold for discarding: {options.MaxSpan} µm");
             #endregion
 
             #region Fit requested profiles
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
+            double featureWidth = double.NaN;
             for (int i = 0; i < bcrReader.NumProfiles; i++)
             {
                 double y = bcrReader.GetPointFor(0, i).Y;
                 if (y >= yStart && y <= yEnd)
                 {
                     fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX * 1e-6, options.RightX * 1e-6);
+                    featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
                         string resultLine = fitVerticalStandard.ToFormattedString(i);
@@ -115,6 +117,34 @@ namespace StepHeight
             if (fitStatistics.NumberOfSamples > 1)
                 ConsoleUI.WriteLine($"{fitStatistics.NumberOfSamples} profiles fitted.");
             #endregion
+
+            #region Generate calibration (output) file
+            StringBuilder reportStringBuilder = new StringBuilder();
+            reportStringBuilder.AppendLine($"Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
+            reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
+            reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
+            reportStringBuilder.AppendLine($"NumberOfProfiles         = {bcrReader.NumProfiles}");
+            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
+            reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale} m");
+            reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale} m");
+            reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale} m");
+            reportStringBuilder.AppendLine($"W1                       = {options.W1}");
+            reportStringBuilder.AppendLine($"W2                       = {options.W2}");
+            reportStringBuilder.AppendLine($"W3                       = {options.W3}");
+            reportStringBuilder.AppendLine($"FirstFeatureEdge         = {options.LeftX} um");
+            reportStringBuilder.AppendLine($"SecondFeatureEdge        = {options.RightX} um");
+            reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth*1e6} um");
+            reportStringBuilder.AppendLine($"FirstProfilePosition     = {options.Y0} um");
+            reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} um");
+            reportStringBuilder.AppendLine($"");
+            reportStringBuilder.AppendLine($"");
+            reportStringBuilder.AppendLine($"");
+            reportStringBuilder.AppendLine($"");
+            reportStringBuilder.AppendLine($"");
+
+
+            #endregion
+
 
             Console.WriteLine();
             Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight * 1e9,6:F2} ± {fitStatistics.HeightRange * 0.5e9:F2}");
