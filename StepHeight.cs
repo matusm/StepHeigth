@@ -120,14 +120,16 @@ namespace StepHeight
 
             #region Generate calibration (output) file
             StringBuilder reportStringBuilder = new StringBuilder();
-            reportStringBuilder.AppendLine($"Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
+            reportStringBuilder.AppendLine($"Output of {ConsoleUI.Title}, version {ConsoleUI.FullVersion}");
             reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
             reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
-            reportStringBuilder.AppendLine($"NumberOfProfiles         = {bcrReader.NumProfiles}");
             reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
-            reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale} m");
-            reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale} m");
-            reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale} m");
+            reportStringBuilder.AppendLine($"NumberOfProfiles         = {bcrReader.NumProfiles}");
+            reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale * 1e6} um");
+            reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale * 1e6} um");
+            reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale * 1e6} um");
+            reportStringBuilder.AppendLine($"ScanFieldWidth           = {bcrReader.RasterData.ScanFieldDimensionX*1e6} um");
+            reportStringBuilder.AppendLine($"ScanFieldHeight          = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} um");
             reportStringBuilder.AppendLine($"W1                       = {options.W1}");
             reportStringBuilder.AppendLine($"W2                       = {options.W2}");
             reportStringBuilder.AppendLine($"W3                       = {options.W3}");
@@ -136,17 +138,11 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth*1e6} um");
             reportStringBuilder.AppendLine($"FirstProfilePosition     = {options.Y0} um");
             reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} um");
-            reportStringBuilder.AppendLine($"");
-            reportStringBuilder.AppendLine($"");
-            reportStringBuilder.AppendLine($"");
-            reportStringBuilder.AppendLine($"");
-            reportStringBuilder.AppendLine($"");
-
 
             #endregion
 
 
-            Console.WriteLine();
+            Console.WriteLine(reportStringBuilder.ToString());
             Console.WriteLine($"Heigth/nm: {fitStatistics.AverageHeight * 1e9,6:F2} ± {fitStatistics.HeightRange * 0.5e9:F2}");
         }
 
