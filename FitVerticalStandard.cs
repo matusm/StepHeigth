@@ -96,7 +96,6 @@ namespace StepHeight
             return retString;
         }
 
-
         #endregion
 
         #region Private methods
@@ -306,7 +305,6 @@ namespace StepHeight
                 Pt = MaxZfor(domainC) - MinZfor(domainAB);
             }
 
-            //////////////////////////
             List<Point3D> predictedFunction = new List<Point3D>();
             List<Point3D> residuals = new List<Point3D>();
 

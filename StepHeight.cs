@@ -14,6 +14,7 @@ namespace StepHeight
     {
         public static void Main(string[] args)
         {
+            const string microMeter = "µm"; // or "um"
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             // parse command line arguments
@@ -83,11 +84,11 @@ namespace StepHeight
             ConsoleUI.WriteLine($"W1: {options.W1}");
             ConsoleUI.WriteLine($"W2: {options.W2}");
             ConsoleUI.WriteLine($"W3: {options.W3}");
-            ConsoleUI.WriteLine($"Position of left edge: {options.LeftX} µm");
-            ConsoleUI.WriteLine($"Position of right edge: {options.RightX} µm");
-            ConsoleUI.WriteLine($"y-value of first profile {options.Y0} µm");
-            ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} µm");
-            ConsoleUI.WriteLine($"Residual threshold for discarding: {options.MaxSpan} µm");
+            ConsoleUI.WriteLine($"Position of left edge: {options.LeftX} {microMeter}");
+            ConsoleUI.WriteLine($"Position of right edge: {options.RightX} {microMeter}");
+            ConsoleUI.WriteLine($"y-value of first profile {options.Y0} {microMeter}");
+            ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} {microMeter}");
+            ConsoleUI.WriteLine($"Residual threshold for discarding: {options.MaxSpan} {microMeter}");
             #endregion
 
             #region Fit requested profiles
@@ -121,40 +122,49 @@ namespace StepHeight
             #region Generate calibration (output) file
             StringBuilder reportStringBuilder = new StringBuilder();
             reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.FullVersion}");
-            reportStringBuilder.AppendLine($"# Input data ##################################");
+            reportStringBuilder.AppendLine($"# Input data ========================================");
+            reportStringBuilder.AppendLine($"# Input file summary ================================");
             reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
             reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
             reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
             reportStringBuilder.AppendLine($"NumberOfProfiles         = {bcrReader.NumProfiles}");
-            reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale * 1e6} um");
-            reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale * 1e6} um");
-            reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale * 1e6} um");
-            reportStringBuilder.AppendLine($"ScanFieldWidth           = {bcrReader.RasterData.ScanFieldDimensionX*1e6} um");
-            reportStringBuilder.AppendLine($"ScanFieldHeight          = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} um");
-            reportStringBuilder.AppendLine($"# Fit parameters ##############################");
+            reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldWidth           = {bcrReader.RasterData.ScanFieldDimensionX*1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldHeight          = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"# Fit parameters ====================================");
+            reportStringBuilder.AppendLine($"FeatureType              = {GetFeatureTypeFor(options.TypeIndex)}");
             reportStringBuilder.AppendLine($"W1                       = {options.W1}");
             reportStringBuilder.AppendLine($"W2                       = {options.W2}");
             reportStringBuilder.AppendLine($"W3                       = {options.W3}");
-            reportStringBuilder.AppendLine($"FirstFeatureEdge         = {options.LeftX} um");
-            reportStringBuilder.AppendLine($"SecondFeatureEdge        = {options.RightX} um");
-            reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth*1e6} um");
-            reportStringBuilder.AppendLine($"FirstProfilePosition     = {options.Y0} um");
-            reportStringBuilder.AppendLine($"ProfileBand              = {options.DeltaY} um");
-            reportStringBuilder.AppendLine($"# Fit results #################################");
+            reportStringBuilder.AppendLine($"FirstFeatureEdge         = {options.LeftX} {microMeter}");
+            reportStringBuilder.AppendLine($"SecondFeatureEdge        = {options.RightX} {microMeter}");
+            reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth*1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"FirstProfilePosition     = {options.Y0} {microMeter}");
+            if (options.DeltaY > bcrReader.RasterData.ScanFieldDimensionY * 1e6)
+                reportStringBuilder.AppendLine($"EvaluationWidth          = infinity");
+            else
+                reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} {microMeter}");
+            reportStringBuilder.AppendLine($"ThresholdResiduals       = {options.MaxSpan} {microMeter}");
+            reportStringBuilder.AppendLine($"# Fit results =======================================");
             reportStringBuilder.AppendLine($"NumberOfValidProfiles    = {fitStatistics.NumberOfSamples}");
-            reportStringBuilder.AppendLine($"AverageHeigth            = {fitStatistics.AverageHeight * 1e9,6:F2} nm");
-            reportStringBuilder.AppendLine($"HeightRange              = {fitStatistics.HeightRange * 1e9:F2} nm");
-            reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} um");
-            reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} um");
-            reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} um");
-            reportStringBuilder.AppendLine($"# Columns #####################################");
+            reportStringBuilder.AppendLine($"AverageHeigth            = {fitStatistics.AverageHeight * 1e6,6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"RangeOfHeights           = {fitStatistics.HeightRange * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"# Columns ===========================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
-            reportStringBuilder.AppendLine($"# 2 : Transvers position / um");
-            reportStringBuilder.AppendLine($"# 3 : Feature height/depth / um");
-            reportStringBuilder.AppendLine($"# 4 : Range of residuals / um");
-            reportStringBuilder.AppendLine($"# 5 : Radius / um");
-            reportStringBuilder.AppendLine($"# 6 : Asymmetry index");
-            reportStringBuilder.AppendLine($"###############################################");
+            reportStringBuilder.AppendLine($"# 2 : Transvers position / {microMeter}");
+            reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
+            reportStringBuilder.AppendLine($"# 4 : Pt / {microMeter}");
+            reportStringBuilder.AppendLine($"# 5 : Range of residuals / {microMeter}");
+            if (GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Groove ||
+                GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Ridge)
+            {
+                reportStringBuilder.AppendLine($"# 6 : Radius / {microMeter}");
+                reportStringBuilder.AppendLine($"# 7 : Asymmetry index");
+            }
+            reportStringBuilder.AppendLine($"#====================================================");
+            reportStringBuilder.Append(fittedProfilsResult);
             #endregion
 
 
