@@ -207,12 +207,12 @@ namespace StepHeight
                 case FeatureType.FallingEdge:
                 case FeatureType.RisingEdge:
                     // output for rectangular (flat toped) features
-                    retString = $"{profileIndex,5} {y,8:F2} {h,10:F4} {pt,10:F4} {res,10:F4}";
+                    retString = $"{profileIndex,5} {y,7:F1} {h,10:F4} {pt,10:F4} {res,10:F4}";
                     break;
                 case FeatureType.A2Groove:
                 case FeatureType.A2Ridge:
                     // output for cylindrical features
-                    retString = $"{profileIndex,5} {y,8:F2} {h,10:F4} {pt,10:F4} {res,10:F4} {r,8:F1} {asy,6:F3}";
+                    retString = $"{profileIndex,5} {y,7:F1} {h,10:F4} {pt,10:F4} {res,10:F4} {r,8:F1} {asy,6:F3}";
                     break;
             }
             return retString;
