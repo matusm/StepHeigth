@@ -119,11 +119,9 @@ namespace StepHeight
                 ConsoleUI.WriteLine($"{fitStatistics.NumberOfSamples} profiles fitted.");
             #endregion
 
-            #region Generate calibration (output) file
+            #region Collate calibration (output) file data
             StringBuilder reportStringBuilder = new StringBuilder();
             reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.FullVersion}");
-            reportStringBuilder.AppendLine($"# Input data ========================================");
-            reportStringBuilder.AppendLine($"# Input file summary ================================");
             reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
             reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
             reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
@@ -149,8 +147,16 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"ThresholdResiduals       = {options.MaxSpan} {microMeter}");
             reportStringBuilder.AppendLine($"# Fit results =======================================");
             reportStringBuilder.AppendLine($"NumberOfValidProfiles    = {fitStatistics.NumberOfSamples}");
-            reportStringBuilder.AppendLine($"AverageHeigth            = {fitStatistics.AverageHeight * 1e6,6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"AverageHeight            = {fitStatistics.AverageHeight * 1e6:F5} {microMeter}");
             reportStringBuilder.AppendLine($"RangeOfHeights           = {fitStatistics.HeightRange * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"AveragePt                = {fitStatistics.AveragePt * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"RangeOfPt                = {fitStatistics.PtRange * 1e6:F5} {microMeter}");
+            if (GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Groove ||
+                GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Ridge)
+            {
+                reportStringBuilder.AppendLine($"AverageRadius            = {fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}");
+                reportStringBuilder.AppendLine($"RangeOfRadii             = {fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}");
+            }
             reportStringBuilder.AppendLine($"# Columns ===========================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
             reportStringBuilder.AppendLine($"# 2 : Transvers position / {microMeter}");
@@ -167,8 +173,19 @@ namespace StepHeight
             reportStringBuilder.Append(fittedProfilsResult);
             #endregion
 
+            #region Write output file
+            ConsoleUI.WritingFile(outputFileName);
+            try
+            {
+                File.WriteAllText(outputFileName, reportStringBuilder.ToString());
+            }
+            catch
+            {
+                ConsoleUI.ErrorExit("!Error writing file", 2);
+            }
+            ConsoleUI.Done();
+            #endregion
 
-            Console.WriteLine(reportStringBuilder.ToString());
         }
 
 
