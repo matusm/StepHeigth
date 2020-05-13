@@ -104,7 +104,7 @@ namespace StepHeight
                     featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
-                        string resultLine = fitVerticalStandard.ToFormattedString(i);
+                        string resultLine = ToFormattedString(i, fitVerticalStandard);
                         ConsoleUI.WriteLine($" > {resultLine}");
                         fittedProfilsResult.AppendLine(resultLine);
                         fitStatistics.Update();
@@ -171,6 +171,35 @@ namespace StepHeight
             Console.WriteLine(reportStringBuilder.ToString());
         }
 
+
+        //=====================================================================
+
+        static string ToFormattedString(int profileIndex, FitVerticalStandard fvs)
+        {
+            string retString = "";
+            double h = fvs.Height * 1e6;    // nm
+            double pt = fvs.Pt * 1e6;       // nm
+            double res = fvs.RangeOfResiduals * 1e6;    // nm
+            double r = fvs.A2Radius * 1e6;  // µm
+            double y = fvs.Yposition * 1e6; // µm
+            double asy = fvs.A2Asymmetry;
+            switch (fvs.FeatureType)
+            {
+                case FeatureType.A1Groove:
+                case FeatureType.A1Ridge:
+                case FeatureType.FallingEdge:
+                case FeatureType.RisingEdge:
+                    // output for rectangular (flat toped) features
+                    retString = $"{profileIndex,5} {y,8:F2} {h,10:F4} {pt,10:F4} {res,10:F4}";
+                    break;
+                case FeatureType.A2Groove:
+                case FeatureType.A2Ridge:
+                    // output for cylindrical features
+                    retString = $"{profileIndex,5} {y,8:F2} {h,10:F4} {pt,10:F4} {res,10:F4} {r,8:F1} {asy,6:F3}";
+                    break;
+            }
+            return retString;
+        }
 
         //=====================================================================
 
