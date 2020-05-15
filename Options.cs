@@ -33,7 +33,7 @@ namespace StepHeight
         [Option('q', "quiet", HelpText = "Quiet mode. No screen output (except for errors)")]
         public bool BeQuiet { get; set; }
 
-        [Option("comment", DefaultValue = "", HelpText = "User supplied comment string")]
+        [Option("comment", DefaultValue = "---", HelpText = "User supplied comment string")]
         public string UserComment { get; set; }
 
         [Option("maxspan", DefaultValue = 0.1, HelpText = "Discard fit if residuals are larger, in um")]

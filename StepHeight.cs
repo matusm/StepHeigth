@@ -92,6 +92,7 @@ namespace StepHeight
             #endregion
 
             #region Fit requested profiles
+            int numberDiscardedProfiles = 0;
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
             double featureWidth = double.NaN;
@@ -109,14 +110,18 @@ namespace StepHeight
                         fittedProfilsResult.AppendLine(resultLine);
                         fitStatistics.Update();
                     }
+                    else
+                    {
+                        numberDiscardedProfiles++;
+                    }
                 }
             }
             if (fitStatistics.NumberOfSamples == 0)
                 ConsoleUI.ErrorExit("!No valid profile fit found", 3);
             if (fitStatistics.NumberOfSamples == 1)
-                ConsoleUI.WriteLine("1 profile fitted.");
+                ConsoleUI.WriteLine($"1 profile fitted, {numberDiscardedProfiles} discarded.");
             if (fitStatistics.NumberOfSamples > 1)
-                ConsoleUI.WriteLine($"{fitStatistics.NumberOfSamples} profiles fitted.");
+                ConsoleUI.WriteLine($"{fitStatistics.NumberOfSamples} profiles fitted, {numberDiscardedProfiles} discarded.");
             if (fitStatistics.AverageHeight < 1e-7)
                 ConsoleUI.WriteLine($"Average feature heigth/depth {fitStatistics.AverageHeight * 1e9:F2} nm");
             else
@@ -127,43 +132,44 @@ namespace StepHeight
             #region Collate calibration (output) file data
             StringBuilder reportStringBuilder = new StringBuilder();
             reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
-            reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
-            reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
-            reportStringBuilder.AppendLine($"UserComment              = {options.UserComment}");
-            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
-            reportStringBuilder.AppendLine($"NumberOfProfiles         = {bcrReader.NumProfiles}");
-            reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldWidth           = {bcrReader.RasterData.ScanFieldDimensionX * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldHeight          = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"# Fit parameters ====================================");
-            reportStringBuilder.AppendLine($"FeatureType              = {GetFeatureTypeFor(options.TypeIndex)}");
-            reportStringBuilder.AppendLine($"W1                       = {options.W1}");
-            reportStringBuilder.AppendLine($"W2                       = {options.W2}");
-            reportStringBuilder.AppendLine($"W3                       = {options.W3}");
-            reportStringBuilder.AppendLine($"FirstFeatureEdge         = {options.LeftX} {microMeter}");
-            reportStringBuilder.AppendLine($"SecondFeatureEdge        = {options.RightX} {microMeter}");
-            reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"FirstProfilePosition     = {options.Y0} {microMeter}");
+            reportStringBuilder.AppendLine($"InputFile                 = {inputFileName}");
+            reportStringBuilder.AppendLine($"ManufacID                 = {bcrReader.ManufacID}");
+            reportStringBuilder.AppendLine($"UserComment               = {options.UserComment}");
+            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile  = {bcrReader.NumPoints}");
+            reportStringBuilder.AppendLine($"NumberOfProfiles          = {bcrReader.NumProfiles}");
+            reportStringBuilder.AppendLine($"XScale                    = {bcrReader.XScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"YScale                    = {bcrReader.YScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ZScale                    = {bcrReader.ZScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldWidth            = {bcrReader.RasterData.ScanFieldDimensionX * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldHeight           = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"# Fit parameters =====================================");
+            reportStringBuilder.AppendLine($"FeatureType               = {GetFeatureTypeFor(options.TypeIndex)}");
+            reportStringBuilder.AppendLine($"W1                        = {options.W1}");
+            reportStringBuilder.AppendLine($"W2                        = {options.W2}");
+            reportStringBuilder.AppendLine($"W3                        = {options.W3}");
+            reportStringBuilder.AppendLine($"FirstFeatureEdge          = {options.LeftX} {microMeter}");
+            reportStringBuilder.AppendLine($"SecondFeatureEdge         = {options.RightX} {microMeter}");
+            reportStringBuilder.AppendLine($"FeatureWidth              = {featureWidth * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"FirstProfilePosition      = {options.Y0} {microMeter}");
             if (options.DeltaY > bcrReader.RasterData.ScanFieldDimensionY * 1e6)
-                reportStringBuilder.AppendLine($"EvaluationWidth          = infinity");
+                reportStringBuilder.AppendLine($"EvaluationWidth           = infinity");
             else
-                reportStringBuilder.AppendLine($"EvaluationWidth          = {options.DeltaY} {microMeter}");
-            reportStringBuilder.AppendLine($"ThresholdResiduals       = {options.MaxSpan} {microMeter}");
+                reportStringBuilder.AppendLine($"EvaluationWidth           = {options.DeltaY} {microMeter}");
+            reportStringBuilder.AppendLine($"ThresholdResiduals        = {options.MaxSpan} {microMeter}");
             reportStringBuilder.AppendLine($"# Fit results =======================================");
-            reportStringBuilder.AppendLine($"NumberOfValidProfiles    = {fitStatistics.NumberOfSamples}");
-            reportStringBuilder.AppendLine($"AverageHeight            = {fitStatistics.AverageHeight * 1e6:F5} {microMeter}");
-            reportStringBuilder.AppendLine($"RangeOfHeights           = {fitStatistics.HeightRange * 1e6:F5} {microMeter}");
-            reportStringBuilder.AppendLine($"AveragePt                = {fitStatistics.AveragePt * 1e6:F5} {microMeter}");
-            reportStringBuilder.AppendLine($"RangeOfPt                = {fitStatistics.PtRange * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"NumberOfValidProfiles     = {fitStatistics.NumberOfSamples}");
+            reportStringBuilder.AppendLine($"NumberOfDiscardedProfiles = {numberDiscardedProfiles}");
+            reportStringBuilder.AppendLine($"AverageHeight             = {fitStatistics.AverageHeight * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"RangeOfHeights            = {fitStatistics.HeightRange * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"AveragePt                 = {fitStatistics.AveragePt * 1e6:F5} {microMeter}");
+            reportStringBuilder.AppendLine($"RangeOfPt                 = {fitStatistics.PtRange * 1e6:F5} {microMeter}");
             if (GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Groove ||
                 GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Ridge)
             {
-                reportStringBuilder.AppendLine($"AverageRadius            = {fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}");
-                reportStringBuilder.AppendLine($"RangeOfRadii             = {fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}");
+                reportStringBuilder.AppendLine($"AverageRadius             = {fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}");
+                reportStringBuilder.AppendLine($"RangeOfRadii              = {fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}");
             }
-            reportStringBuilder.AppendLine($"# Columns ===========================================");
+            reportStringBuilder.AppendLine($"# Columns ============================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
             reportStringBuilder.AppendLine($"# 2 : Profile position / {microMeter}");
             reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
@@ -175,7 +181,7 @@ namespace StepHeight
                 reportStringBuilder.AppendLine($"# 6 : Radius / {microMeter}");
                 reportStringBuilder.AppendLine($"# 7 : Asymmetry index");
             }
-            reportStringBuilder.AppendLine($"#====================================================");
+            reportStringBuilder.AppendLine($"#=====================================================");
             reportStringBuilder.Append(fittedProfilsResult);
             #endregion
 
