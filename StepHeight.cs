@@ -129,6 +129,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
             reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
             reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
+            reportStringBuilder.AppendLine($"UserComment              = {options.UserComment}");
             reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
             reportStringBuilder.AppendLine($"NumberOfProfiles         = {bcrReader.NumProfiles}");
             reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale * 1e6} {microMeter}");
