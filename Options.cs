@@ -39,9 +39,6 @@ namespace StepHeight
         [Option("maxspan", DefaultValue = 0.1, HelpText = "Discard fit if residuals are larger, in um")]
         public double MaxSpan { get; set; }
 
-        [Option("precision", DefaultValue = 4, HelpText = "Decimal digits for results")]
-        public int Precision { get; set; }
-
         [Option("outextension", DefaultValue = "prn", HelpText = "Extension for output file")]
         public string OutFileExt { get; set; }
 
@@ -74,7 +71,7 @@ namespace StepHeight
             help.AddPreOptionsLine("");
             help.AddPreOptionsLine("Usage: " + AppName + " filename1 [filename2] [filename3] [options]");
             help.AddPostOptionsLine("");
-            help.AddPostOptionsLine("Supported values for --type:");
+            help.AddPostOptionsLine("Supported values for --type (-t):");
             help.AddPostOptionsLine("   1: ISO A1 (rectangular ridge)");
             help.AddPostOptionsLine("   2: ISO A2 (cylindrical groove)");
             help.AddPostOptionsLine("   3: ISO A1 (rectangular groove)");
