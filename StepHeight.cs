@@ -117,11 +117,16 @@ namespace StepHeight
                 ConsoleUI.WriteLine("1 profile fitted.");
             if (fitStatistics.NumberOfSamples > 1)
                 ConsoleUI.WriteLine($"{fitStatistics.NumberOfSamples} profiles fitted.");
+            if (fitStatistics.AverageHeight < 1e-7)
+                ConsoleUI.WriteLine($"Average feature heigth/depth {fitStatistics.AverageHeight * 1e9:F2} nm");
+            else
+                ConsoleUI.WriteLine($"Average feature heigth/depth {fitStatistics.AverageHeight * 1e6:F3} {microMeter}");
+
             #endregion
 
             #region Collate calibration (output) file data
             StringBuilder reportStringBuilder = new StringBuilder();
-            reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.FullVersion}");
+            reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
             reportStringBuilder.AppendLine($"InputFile                = {inputFileName}");
             reportStringBuilder.AppendLine($"ManufacID                = {bcrReader.ManufacID}");
             reportStringBuilder.AppendLine($"NumberOfPointsPerProfile = {bcrReader.NumPoints}");
@@ -129,7 +134,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"XScale                   = {bcrReader.XScale * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"YScale                   = {bcrReader.YScale * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"ZScale                   = {bcrReader.ZScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldWidth           = {bcrReader.RasterData.ScanFieldDimensionX*1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldWidth           = {bcrReader.RasterData.ScanFieldDimensionX * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"ScanFieldHeight          = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"# Fit parameters ====================================");
             reportStringBuilder.AppendLine($"FeatureType              = {GetFeatureTypeFor(options.TypeIndex)}");
@@ -138,7 +143,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"W3                       = {options.W3}");
             reportStringBuilder.AppendLine($"FirstFeatureEdge         = {options.LeftX} {microMeter}");
             reportStringBuilder.AppendLine($"SecondFeatureEdge        = {options.RightX} {microMeter}");
-            reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth*1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"FeatureWidth             = {featureWidth * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"FirstProfilePosition     = {options.Y0} {microMeter}");
             if (options.DeltaY > bcrReader.RasterData.ScanFieldDimensionY * 1e6)
                 reportStringBuilder.AppendLine($"EvaluationWidth          = infinity");
@@ -159,7 +164,7 @@ namespace StepHeight
             }
             reportStringBuilder.AppendLine($"# Columns ===========================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
-            reportStringBuilder.AppendLine($"# 2 : Transvers position / {microMeter}");
+            reportStringBuilder.AppendLine($"# 2 : Profile position / {microMeter}");
             reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
             reportStringBuilder.AppendLine($"# 4 : Pt / {microMeter}");
             reportStringBuilder.AppendLine($"# 5 : Range of residuals / {microMeter}");
@@ -184,6 +189,33 @@ namespace StepHeight
                 ConsoleUI.ErrorExit("!Error writing file", 2);
             }
             ConsoleUI.Done();
+            #endregion
+
+            #region Prepare and write average residual plot
+            if (fitStatistics.AverageResidualPlot != null)
+            {
+                StringBuilder plot = new StringBuilder();
+                plot.AppendLine($"1 : x coordinate in {microMeter}");
+                plot.AppendLine($"2 : average fit residuals in nm");
+                plot.AppendLine($"@@@@");
+                foreach (var point in fitStatistics.AverageResidualPlot)
+                {
+                    double x = point.X * 1e6;
+                    double z = point.Z * 1e9;
+                    plot.AppendLine($"{x,10:F3} {z,10:F3}");
+                }
+                // and now write to file
+                ConsoleUI.WritingFile(residualsFileName);
+                try
+                {
+                    File.WriteAllText(residualsFileName, plot.ToString());
+                }
+                catch
+                {
+                    ConsoleUI.ErrorExit("!Error writing file", 2);
+                }
+                ConsoleUI.Done();
+            }
             #endregion
 
         }
