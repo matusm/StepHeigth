@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Bev.IO.BcrReader;
-using Bev.SurfaceRasterData;
 
 namespace StepHeight
 {
@@ -65,6 +62,11 @@ namespace StepHeight
                 ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReader.Status}", 2);
             #endregion
 
+            #region Set offset for the scan field
+            bcrReader.SetYOffset(0.0);
+            bcrReader.SetZOffset(0.0);
+            #endregion
+
             #region Y-band logic
             double yStart = options.Y0 * 1e-6;              // in m, ignore profiles with y less than this value
             double yEnd = yStart + (options.DeltaY * 1e-6); // in m, ignore profiles with y greater than this value
@@ -101,7 +103,7 @@ namespace StepHeight
                 double y = bcrReader.GetPointFor(0, i).Y;
                 if (y >= yStart && y <= yEnd)
                 {
-                    fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX * 1e-6, options.RightX * 1e-6);
+                    fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX * 1e-6 + bcrReader.XOffset, options.RightX * 1e-6 + bcrReader.XOffset);
                     featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
