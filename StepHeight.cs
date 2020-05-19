@@ -12,6 +12,7 @@ namespace StepHeight
         public static void Main(string[] args)
         {
             const string microMeter = "µm"; // or "um"
+            InputFilePatches filePatches = InputFilePatches.Unknown;
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             // parse command line arguments
@@ -26,7 +27,7 @@ namespace StepHeight
 
             #region File name logic
             const string inputFileExtension = "sdf";
-            string inputFileName = "";
+            string inputFileName;
             string outputFileName = "";
             string residualsFileName = "";
             // get the filename(s) from command line
@@ -54,17 +55,29 @@ namespace StepHeight
             }
             #endregion
 
-            #region Read input file
+            // we asume for the moment a single file only
+            filePatches = InputFilePatches.Single;
+            //prepare BcrReader objects
+            BcrReader bcrReaderA; // for a single input file also
+            BcrReader bcrReaderB;
+            BcrReader bcrReaderC;
+
+
+            #region Read input file(s)
             ConsoleUI.ReadingFile(inputFileName);
-            BcrReader bcrReader = new BcrReader(inputFileName);
+            bcrReaderA = new BcrReader(inputFileName);
             ConsoleUI.Done();
-            if (bcrReader.Status != ErrorCode.OK)
-                ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReader.Status}", 2);
+            if (bcrReaderA.Status != ErrorCode.OK)
+                ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
             #endregion
 
             #region Set offset for the scan field
-            bcrReader.SetYOffset(0.0);
-            bcrReader.SetZOffset(0.0);
+            if (filePatches == InputFilePatches.Single)
+            {
+                bcrReaderA.SetXOffset(0.0);
+                bcrReaderA.SetYOffset(0.0);
+                bcrReaderA.SetZOffset(0.0);
+            }
             #endregion
 
             #region Y-band logic
@@ -81,13 +94,13 @@ namespace StepHeight
             #region Diagnostic output
             // this is needed for getting the feature type designation
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
-            ConsoleUI.WriteLine($"Number of profiles in scan: {bcrReader.NumProfiles}");
+            ConsoleUI.WriteLine($"Number of profiles in scan: {bcrReaderA.NumProfiles}");
             ConsoleUI.WriteLine($"Feature type: {fitVerticalStandard.FeatureTypeDesignation}");
             ConsoleUI.WriteLine($"W1: {options.W1}");
             ConsoleUI.WriteLine($"W2: {options.W2}");
             ConsoleUI.WriteLine($"W3: {options.W3}");
-            ConsoleUI.WriteLine($"Position of left edge: {options.LeftX} {microMeter}");
-            ConsoleUI.WriteLine($"Position of right edge: {options.RightX} {microMeter}");
+            ConsoleUI.WriteLine($"Position of left feature edge: {options.LeftX} {microMeter}");
+            ConsoleUI.WriteLine($"Position of right feature edge: {options.RightX} {microMeter}");
             ConsoleUI.WriteLine($"y-value of first profile {options.Y0} {microMeter}");
             ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} {microMeter}");
             ConsoleUI.WriteLine($"Residual threshold for discarding: {options.MaxSpan} {microMeter}");
@@ -98,12 +111,12 @@ namespace StepHeight
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
             double featureWidth = double.NaN;
-            for (int i = 0; i < bcrReader.NumProfiles; i++)
+            for (int i = 0; i < bcrReaderA.NumProfiles; i++)
             {
-                double y = bcrReader.GetPointFor(0, i).Y;
+                double y = bcrReaderA.GetPointFor(0, i).Y;
                 if (y >= yStart && y <= yEnd)
                 {
-                    fitVerticalStandard.FitProfile(bcrReader.GetPointsProfileFor(i), options.LeftX * 1e-6 + bcrReader.XOffset, options.RightX * 1e-6 + bcrReader.XOffset);
+                    fitVerticalStandard.FitProfile(bcrReaderA.GetPointsProfileFor(i), options.LeftX * 1e-6 + bcrReaderA.XOffset, options.RightX * 1e-6 + bcrReaderA.XOffset);
                     featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
@@ -114,6 +127,7 @@ namespace StepHeight
                     }
                     else
                     {
+                        ConsoleUI.WriteLine($" > !!! {fitVerticalStandard.RangeOfResiduals}");
                         numberDiscardedProfiles++;
                     }
                 }
@@ -135,15 +149,15 @@ namespace StepHeight
             StringBuilder reportStringBuilder = new StringBuilder();
             reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
             reportStringBuilder.AppendLine($"InputFile                 = {inputFileName}");
-            reportStringBuilder.AppendLine($"ManufacID                 = {bcrReader.ManufacID}");
+            reportStringBuilder.AppendLine($"ManufacID                 = {bcrReaderA.ManufacID}");
             reportStringBuilder.AppendLine($"UserComment               = {options.UserComment}");
-            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile  = {bcrReader.NumPoints}");
-            reportStringBuilder.AppendLine($"NumberOfProfiles          = {bcrReader.NumProfiles}");
-            reportStringBuilder.AppendLine($"XScale                    = {bcrReader.XScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"YScale                    = {bcrReader.YScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ZScale                    = {bcrReader.ZScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldWidth            = {bcrReader.RasterData.ScanFieldDimensionX * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldHeight           = {bcrReader.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile  = {bcrReaderA.NumPoints}");
+            reportStringBuilder.AppendLine($"NumberOfProfiles          = {bcrReaderA.NumProfiles}");
+            reportStringBuilder.AppendLine($"XScale                    = {bcrReaderA.XScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"YScale                    = {bcrReaderA.YScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ZScale                    = {bcrReaderA.ZScale * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldWidth            = {bcrReaderA.RasterData.ScanFieldDimensionX * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldHeight           = {bcrReaderA.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"# Fit parameters =====================================");
             reportStringBuilder.AppendLine($"FeatureType               = {GetFeatureTypeFor(options.TypeIndex)}");
             reportStringBuilder.AppendLine($"W1                        = {options.W1}");
@@ -153,7 +167,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"SecondFeatureEdge         = {options.RightX} {microMeter}");
             reportStringBuilder.AppendLine($"FeatureWidth              = {featureWidth * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"FirstProfilePosition      = {options.Y0} {microMeter}");
-            if (options.DeltaY > bcrReader.RasterData.ScanFieldDimensionY * 1e6)
+            if (options.DeltaY > bcrReaderA.RasterData.ScanFieldDimensionY * 1e6)
                 reportStringBuilder.AppendLine($"EvaluationWidth           = infinity");
             else
                 reportStringBuilder.AppendLine($"EvaluationWidth           = {options.DeltaY} {microMeter}");
@@ -284,5 +298,13 @@ namespace StepHeight
 
         //=====================================================================
 
+    }
+
+    public enum InputFilePatches
+    {
+        Unknown,
+        Single,
+        Two,
+        Three
     }
 }
