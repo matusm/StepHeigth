@@ -58,10 +58,14 @@ namespace StepHeight
             }
             #endregion
 
-            // we asume for the moment a single file only
-            filePatches = InputFilePatches.Single;
+            // check if multipatch
+            if (options.Multifile)
+                filePatches = InputFilePatches.Three;
+            else
+                filePatches = InputFilePatches.Single;
+
             //prepare BcrReader objects
-            BcrReader bcrReaderA = null; // also for a single input file
+            BcrReader bcrReaderA = null; // used also for a single input file
             BcrReader bcrReaderB = null;
             BcrReader bcrReaderC = null;
 
@@ -112,6 +116,12 @@ namespace StepHeight
             }
             if (filePatches == InputFilePatches.Three)
             {
+                double x0A = bcrReaderA.XOffset;
+                double x0B = bcrReaderB.XOffset;
+                double x0C = bcrReaderC.XOffset;
+                bcrReaderA.SetXOffset(0.0);
+                bcrReaderB.SetXOffset(x0B - x0A);
+                bcrReaderC.SetXOffset(x0C - x0A);
                 bcrReaderA.SetYOffset(0.0);
                 bcrReaderA.SetZOffset(0.0);
                 bcrReaderB.SetYOffset(0.0);
