@@ -58,10 +58,9 @@ namespace StepHeight
             // we asume for the moment a single file only
             filePatches = InputFilePatches.Single;
             //prepare BcrReader objects
-            BcrReader bcrReaderA; // for a single input file also
-            BcrReader bcrReaderB;
-            BcrReader bcrReaderC;
-
+            BcrReader bcrReaderA = null; // also for a single input file
+            BcrReader bcrReaderB = null;
+            BcrReader bcrReaderC = null;
 
             #region Read input file(s)
             if (filePatches == InputFilePatches.Single)
@@ -80,21 +79,24 @@ namespace StepHeight
                 bcrReaderA = new BcrReader(fileA);
                 ConsoleUI.Done();
                 if (bcrReaderA.Status != ErrorCode.OK)
-                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 10);
                 // center patch
                 string fileB = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "B", inputFileExtension);
                 ConsoleUI.ReadingFile(fileB);
                 bcrReaderB = new BcrReader(fileB);
                 ConsoleUI.Done();
                 if (bcrReaderB.Status != ErrorCode.OK)
-                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderB.Status}", 2);
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderB.Status}", 10);
                 // right patch
                 string fileC = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "C", inputFileExtension);
                 ConsoleUI.ReadingFile(fileC);
                 bcrReaderC = new BcrReader(fileC);
                 ConsoleUI.Done();
                 if (bcrReaderC.Status != ErrorCode.OK)
-                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderC.Status}", 2);
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderC.Status}", 10);
+                // check if the three files are compatible
+                if (bcrReaderA.NumProfiles != bcrReaderB.NumProfiles || bcrReaderB.NumProfiles != bcrReaderC.NumProfiles)
+                    ConsoleUI.ErrorExit($"!Geometry of input files incompatible", 11);
             }
             #endregion
 
@@ -104,6 +106,15 @@ namespace StepHeight
                 bcrReaderA.SetXOffset(0.0);
                 bcrReaderA.SetYOffset(0.0);
                 bcrReaderA.SetZOffset(0.0);
+            }
+            if(filePatches==InputFilePatches.Three)
+            {
+                bcrReaderA.SetYOffset(0.0);
+                bcrReaderA.SetZOffset(0.0);
+                bcrReaderB.SetYOffset(0.0);
+                bcrReaderB.SetZOffset(0.0);
+                bcrReaderC.SetYOffset(0.0);
+                bcrReaderC.SetZOffset(0.0);
             }
             #endregion
 

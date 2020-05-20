@@ -9,7 +9,7 @@ namespace StepHeight
         [Option('t', "type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
         public int TypeIndex { get; set; }
 
-        [Option("multifile", HelpText = "Quiet mode. No screen output (except for errors)")]
+        [Option("multifile", HelpText = "Use three separate input files")]
         public bool Multifile { get; set; }
 
         [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first edge of feature, in um")]
