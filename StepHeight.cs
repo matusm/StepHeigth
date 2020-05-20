@@ -64,11 +64,38 @@ namespace StepHeight
 
 
             #region Read input file(s)
-            ConsoleUI.ReadingFile(inputFileName);
-            bcrReaderA = new BcrReader(inputFileName);
-            ConsoleUI.Done();
-            if (bcrReaderA.Status != ErrorCode.OK)
-                ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
+            if (filePatches == InputFilePatches.Single)
+            {
+                ConsoleUI.ReadingFile(inputFileName);
+                bcrReaderA = new BcrReader(inputFileName);
+                ConsoleUI.Done();
+                if (bcrReaderA.Status != ErrorCode.OK)
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
+            }
+            if(filePatches==InputFilePatches.Three)
+            {
+                // left patch
+                string fileA = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "A", inputFileExtension);
+                ConsoleUI.ReadingFile(fileA);
+                bcrReaderA = new BcrReader(fileA);
+                ConsoleUI.Done();
+                if (bcrReaderA.Status != ErrorCode.OK)
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
+                // center patch
+                string fileB = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "B", inputFileExtension);
+                ConsoleUI.ReadingFile(fileB);
+                bcrReaderB = new BcrReader(fileB);
+                ConsoleUI.Done();
+                if (bcrReaderB.Status != ErrorCode.OK)
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderB.Status}", 2);
+                // right patch
+                string fileC = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "C", inputFileExtension);
+                ConsoleUI.ReadingFile(fileC);
+                bcrReaderC = new BcrReader(fileC);
+                ConsoleUI.Done();
+                if (bcrReaderC.Status != ErrorCode.OK)
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderC.Status}", 2);
+            }
             #endregion
 
             #region Set offset for the scan field
