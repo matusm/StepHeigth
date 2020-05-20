@@ -1,9 +1,12 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Bev.IO.BcrReader;
+using Bev.SurfaceRasterData;
 
 namespace StepHeight
 {
@@ -71,7 +74,7 @@ namespace StepHeight
                 if (bcrReaderA.Status != ErrorCode.OK)
                     ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
             }
-            if(filePatches==InputFilePatches.Three)
+            if (filePatches == InputFilePatches.Three)
             {
                 // left patch
                 string fileA = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "A", inputFileExtension);
@@ -107,7 +110,7 @@ namespace StepHeight
                 bcrReaderA.SetYOffset(0.0);
                 bcrReaderA.SetZOffset(0.0);
             }
-            if(filePatches==InputFilePatches.Three)
+            if (filePatches == InputFilePatches.Three)
             {
                 bcrReaderA.SetYOffset(0.0);
                 bcrReaderA.SetZOffset(0.0);
@@ -149,16 +152,17 @@ namespace StepHeight
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
             double featureWidth = double.NaN;
-            for (int i = 0; i < bcrReaderA.NumProfiles; i++)
+            for (int profileIndex = 0; profileIndex < bcrReaderA.NumProfiles; profileIndex++)
             {
-                double y = bcrReaderA.GetPointFor(0, i).Y;
+                double y = bcrReaderA.GetPointFor(0, profileIndex).Y;
                 if (y >= yStart && y <= yEnd)
                 {
-                    fitVerticalStandard.FitProfile(bcrReaderA.GetPointsProfileFor(i), options.LeftX * 1e-6 + bcrReaderA.XOffset, options.RightX * 1e-6 + bcrReaderA.XOffset);
+                    Point3D[] currentProfile = PrepareProfile(profileIndex, bcrReaderA, bcrReaderB, bcrReaderC);
+                    fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6);
                     featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
-                        string resultLine = ToFormattedString(i, fitVerticalStandard);
+                        string resultLine = ToFormattedString(profileIndex, fitVerticalStandard);
                         ConsoleUI.WriteLine($" > {resultLine}");
                         fittedProfilsResult.AppendLine(resultLine);
                         fitStatistics.Update();
@@ -281,10 +285,29 @@ namespace StepHeight
 
         }
 
+        //=====================================================================
+
+        private static Point3D[] PrepareProfile(int profileIndex, BcrReader bcrReaderA, BcrReader bcrReaderB, BcrReader bcrReaderC)
+        {
+            if (bcrReaderA == null)
+                ConsoleUI.ErrorExit("!This should not happen", 20);
+            if (bcrReaderB == null && bcrReaderC == null)
+                return bcrReaderA.GetPointsProfileFor(profileIndex);
+            List<Point3D> points = new List<Point3D>();
+            foreach (var point in bcrReaderA.GetPointsProfileFor(profileIndex))
+                points.Add(point);
+            if (bcrReaderB != null)
+                foreach (var point in bcrReaderB.GetPointsProfileFor(profileIndex))
+                    points.Add(point);
+            if (bcrReaderC != null)
+                foreach (var point in bcrReaderC.GetPointsProfileFor(profileIndex))
+                    points.Add(point);
+            return points.ToArray();
+        }
 
         //=====================================================================
 
-        static string ToFormattedString(int profileIndex, FitVerticalStandard fvs)
+        private static string ToFormattedString(int profileIndex, FitVerticalStandard fvs)
         {
             string retString = "";
             double h = fvs.Height * 1e6;    // nm
@@ -313,7 +336,7 @@ namespace StepHeight
 
         //=====================================================================
 
-        static FeatureType GetFeatureTypeFor(int index)
+        private static FeatureType GetFeatureTypeFor(int index)
         {
             switch (index)
             {
