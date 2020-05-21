@@ -179,7 +179,7 @@ namespace StepHeight
                     }
                     else
                     {
-                        ConsoleUI.WriteLine($" > !!! {fitVerticalStandard.RangeOfResiduals}");
+                        ConsoleUI.WriteLine($" > {profileIndex,5} profile discarded ({fitVerticalStandard.RangeOfResiduals*1e6:F4} {microMeter})");
                         numberDiscardedProfiles++;
                     }
                 }
