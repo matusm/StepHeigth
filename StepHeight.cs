@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,7 +14,7 @@ namespace StepHeight
         public static void Main(string[] args)
         {
             const string microMeter = "µm"; // or "um"
-            InputFilePatches filePatches = InputFilePatches.Unknown;
+            ScanFieldTopology scanFieldTopology = ScanFieldTopology.Unknown;
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             // parse command line arguments
@@ -60,9 +59,9 @@ namespace StepHeight
 
             // check if multipatch
             if (options.Multifile)
-                filePatches = InputFilePatches.Three;
+                scanFieldTopology = ScanFieldTopology.Three;
             else
-                filePatches = InputFilePatches.Single;
+                scanFieldTopology = ScanFieldTopology.Single;
 
             //prepare BcrReader objects
             BcrReader bcrReaderA = null; // used also for a single input file
@@ -70,7 +69,7 @@ namespace StepHeight
             BcrReader bcrReaderC = null;
 
             #region Read input file(s)
-            if (filePatches == InputFilePatches.Single)
+            if (scanFieldTopology == ScanFieldTopology.Single)
             {
                 ConsoleUI.ReadingFile(inputFileName);
                 bcrReaderA = new BcrReader(inputFileName);
@@ -78,7 +77,7 @@ namespace StepHeight
                 if (bcrReaderA.Status != ErrorCode.OK)
                     ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
             }
-            if (filePatches == InputFilePatches.Three)
+            if (scanFieldTopology == ScanFieldTopology.Three)
             {
                 // left patch
                 string fileA = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "A", inputFileExtension);
@@ -108,13 +107,13 @@ namespace StepHeight
             #endregion
 
             #region Set offset for the scan field
-            if (filePatches == InputFilePatches.Single)
+            if (scanFieldTopology == ScanFieldTopology.Single)
             {
                 bcrReaderA.SetXOffset(0.0);
                 bcrReaderA.SetYOffset(0.0);
                 bcrReaderA.SetZOffset(0.0);
             }
-            if (filePatches == InputFilePatches.Three)
+            if (scanFieldTopology == ScanFieldTopology.Three)
             {
                 double x0A = bcrReaderA.XOffset;
                 double x0B = bcrReaderB.XOffset;
@@ -142,10 +141,31 @@ namespace StepHeight
             }
             #endregion
 
-            #region Diagnostic output
+            #region Diagnostic console output
+            int pointsPerProfile = 0;
+            int numberPatches = 0;
+            Point3D[] firstProfile = ExtractProfile(0, bcrReaderA, bcrReaderB, bcrReaderC);
+            double scanFieldWidth = firstProfile.Max().X - firstProfile.Min().X;
+            if (scanFieldTopology == ScanFieldTopology.Single)
+            {
+                numberPatches = 1;
+                pointsPerProfile = bcrReaderA.NumPoints;
+            }
+            if (scanFieldTopology == ScanFieldTopology.Two)
+            {
+                numberPatches = 2;
+                pointsPerProfile = bcrReaderA.NumPoints + bcrReaderB.NumPoints;
+            }
+            if (scanFieldTopology == ScanFieldTopology.Three)
+            {
+                numberPatches = 3;
+                pointsPerProfile = bcrReaderA.NumPoints + bcrReaderB.NumPoints + bcrReaderC.NumPoints;
+            }
             // FitVerticalStandard must be called here for getting the feature type designation
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
-            ConsoleUI.WriteLine($"Number of profiles in scan: {bcrReaderA.NumProfiles}");
+            ConsoleUI.WriteLine($"Disjoined scan fields: {numberPatches}");
+            ConsoleUI.WriteLine($"Number of points per profile: {pointsPerProfile}");
+            ConsoleUI.WriteLine($"Number of profiles: {bcrReaderA.NumProfiles}");
             ConsoleUI.WriteLine($"Feature type: {fitVerticalStandard.FeatureTypeDesignation}");
             ConsoleUI.WriteLine($"W1: {options.W1}");
             ConsoleUI.WriteLine($"W2: {options.W2}");
@@ -161,6 +181,7 @@ namespace StepHeight
             #endregion
 
             #region Fit requested profiles
+            ConsoleUI.WriteLine("Start fitting profiles.");
             int numberDiscardedProfiles = 0;
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
@@ -174,10 +195,16 @@ namespace StepHeight
                     fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6);
                     if (fitVerticalStandard.Status == FitStatus.BadEdgePosition)
                         ConsoleUI.ErrorExit("!Location of feature edge outside fom profile", 30);
+                    if(fitVerticalStandard.Status!=FitStatus.Success)
+                    {
+                        ConsoleUI.WriteLine($" > {profileIndex,5} profile discarded ({fitVerticalStandard.Status})");
+                        numberDiscardedProfiles++;
+                        break;
+                    }
                     featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
-                        string resultLine = ToFormattedString(profileIndex, fitVerticalStandard);
+                        string resultLine = FormattedStringForFitResult(profileIndex, fitVerticalStandard);
                         ConsoleUI.WriteLine($" > {resultLine}");
                         fittedProfilsResult.AppendLine(resultLine);
                         fitStatistics.Update();
@@ -202,18 +229,19 @@ namespace StepHeight
 
             #endregion
 
-            #region Collate calibration (output) file data
+            #region Collate calibration (output) data
             StringBuilder reportStringBuilder = new StringBuilder();
             reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
             reportStringBuilder.AppendLine($"InputFile                 = {inputFileName}");
+            reportStringBuilder.AppendLine($"DisjointScanFields        = {numberPatches}");
             reportStringBuilder.AppendLine($"ManufacID                 = {bcrReaderA.ManufacID}");
             reportStringBuilder.AppendLine($"UserComment               = {options.UserComment}");
-            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile  = {bcrReaderA.NumPoints}");
+            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile  = {pointsPerProfile}");
             reportStringBuilder.AppendLine($"NumberOfProfiles          = {bcrReaderA.NumProfiles}");
             reportStringBuilder.AppendLine($"XScale                    = {bcrReaderA.XScale * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"YScale                    = {bcrReaderA.YScale * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"ZScale                    = {bcrReaderA.ZScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldWidth            = {bcrReaderA.RasterData.ScanFieldDimensionX * 1e6} {microMeter}");
+            reportStringBuilder.AppendLine($"ScanFieldWidth            = {scanFieldWidth * 1e6:F2} {microMeter}");
             reportStringBuilder.AppendLine($"ScanFieldHeight           = {bcrReaderA.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"# Fit parameters =====================================");
             reportStringBuilder.AppendLine($"FeatureType               = {GetFeatureTypeFor(options.TypeIndex)}");
@@ -322,7 +350,7 @@ namespace StepHeight
 
         //=====================================================================
 
-        private static string ToFormattedString(int profileIndex, FitVerticalStandard fvs)
+        private static string FormattedStringForFitResult(int profileIndex, FitVerticalStandard fvs)
         {
             string retString = "";
             double h = fvs.Height * 1e6;    // nm
@@ -373,10 +401,9 @@ namespace StepHeight
         }
 
         //=====================================================================
-
     }
 
-    public enum InputFilePatches
+    public enum ScanFieldTopology
     {
         Unknown,
         Single,
