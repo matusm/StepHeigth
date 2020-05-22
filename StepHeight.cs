@@ -58,6 +58,7 @@ namespace StepHeight
             #endregion
 
             // check if multipatch
+            // TODO provide means to use two scan fields
             if (options.Multifile)
                 scanFieldTopology = ScanFieldTopology.Three;
             else
@@ -76,6 +77,26 @@ namespace StepHeight
                 ConsoleUI.Done();
                 if (bcrReaderA.Status != ErrorCode.OK)
                     ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 2);
+            }
+            if (scanFieldTopology == ScanFieldTopology.Two)
+            {
+                // left patch
+                string fileA = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "A", inputFileExtension);
+                ConsoleUI.ReadingFile(fileA);
+                bcrReaderA = new BcrReader(fileA);
+                ConsoleUI.Done();
+                if (bcrReaderA.Status != ErrorCode.OK)
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderA.Status}", 10);
+                // center patch
+                string fileB = Path.ChangeExtension(Path.GetFileNameWithoutExtension(inputFileName) + "B", inputFileExtension);
+                ConsoleUI.ReadingFile(fileB);
+                bcrReaderB = new BcrReader(fileB);
+                ConsoleUI.Done();
+                if (bcrReaderB.Status != ErrorCode.OK)
+                    ConsoleUI.ErrorExit($"!BcrReader ErrorCode: {bcrReaderB.Status}", 10);
+                // check if the three files are compatible
+                if (bcrReaderA.NumProfiles != bcrReaderB.NumProfiles)
+                    ConsoleUI.ErrorExit($"!Geometry of input files incompatible", 11);
             }
             if (scanFieldTopology == ScanFieldTopology.Three)
             {
@@ -112,6 +133,17 @@ namespace StepHeight
                 bcrReaderA.SetXOffset(0.0);
                 bcrReaderA.SetYOffset(0.0);
                 bcrReaderA.SetZOffset(0.0);
+            }
+            if (scanFieldTopology == ScanFieldTopology.Two)
+            {
+                double x0A = bcrReaderA.XOffset;
+                double x0B = bcrReaderB.XOffset;
+                bcrReaderA.SetXOffset(0.0);
+                bcrReaderB.SetXOffset(x0B - x0A);
+                bcrReaderA.SetYOffset(0.0);
+                bcrReaderA.SetZOffset(0.0);
+                bcrReaderB.SetYOffset(0.0);
+                bcrReaderB.SetZOffset(0.0);
             }
             if (scanFieldTopology == ScanFieldTopology.Three)
             {
@@ -194,7 +226,7 @@ namespace StepHeight
                     Point3D[] currentProfile = ExtractProfile(profileIndex, bcrReaderA, bcrReaderB, bcrReaderC);
                     fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6);
                     if (fitVerticalStandard.Status == FitStatus.BadEdgePosition)
-                        ConsoleUI.ErrorExit("!Location of feature edge outside fom profile", 30);
+                        ConsoleUI.ErrorExit("!Feature edge location outside of profile", 30);
                     if(fitVerticalStandard.Status!=FitStatus.Success)
                     {
                         ConsoleUI.WriteLine($" > {profileIndex,5} profile discarded ({fitVerticalStandard.Status})");
