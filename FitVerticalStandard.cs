@@ -23,6 +23,7 @@ namespace StepHeight
 
         #region Properties
         // imutable properties set by the constructor
+        public FitStatus Status { get; private set; }
         public FeatureType FeatureType { get; private set; }// type of feature to be fitted
         public string FeatureTypeDesignation => GetDesignationForFeatureType(FeatureType);
         public double DomainLengthA { get; private set; }    	    // normalized reference evaluation length (2/3)
@@ -49,8 +50,22 @@ namespace StepHeight
         {
             ResetProperties();
             Point3D[] filteredProfile = RemoveBadPoints(profile);
-            if (filteredProfile.Length == 0) return;
+            if (filteredProfile.Length == 0)
+            {
+                Status= FitStatus.NoData;
+                return;
+            }
             Yposition = filteredProfile[0].Y;
+            if (leftEdgePosition < filteredProfile.Min().X || leftEdgePosition > filteredProfile.Max().X)
+            {
+                Status = FitStatus.BadEdgePosition;
+                return;
+            }
+            if (rightEdgePosition < filteredProfile.Min().X || rightEdgePosition > filteredProfile.Max().X)
+            {
+                Status = FitStatus.BadEdgePosition;
+                return;
+            }
             // probably one should center the profile in x and z direction
             switch (FeatureType)
             {
@@ -67,11 +82,13 @@ namespace StepHeight
                     FitEdge(filteredProfile, leftEdgePosition);
                     break;
             }
+            Status = FitStatus.Success;
         }
 
         #endregion
 
         #region Private methods
+
         // fit algorithms
 
         private void FitA1(Point3D[] profile, double leftEdgePosition, double rightEdgePosition)
@@ -417,6 +434,7 @@ namespace StepHeight
             A2CenterPosition = double.NaN;
             Residuals = null;
             PredictedFunction = null;
+            Status = FitStatus.Unknown;
         }
 
         #endregion
@@ -433,4 +451,11 @@ namespace StepHeight
         FallingEdge // single edge high->low
     }
 
+    public enum FitStatus
+    {
+        Unknown,
+        Success,
+        BadEdgePosition,
+        NoData
+    }
 }

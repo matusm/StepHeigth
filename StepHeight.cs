@@ -143,7 +143,7 @@ namespace StepHeight
             #endregion
 
             #region Diagnostic output
-            // this is needed for getting the feature type designation
+            // FitVerticalStandard must be called here for getting the feature type designation
             FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
             ConsoleUI.WriteLine($"Number of profiles in scan: {bcrReaderA.NumProfiles}");
             ConsoleUI.WriteLine($"Feature type: {fitVerticalStandard.FeatureTypeDesignation}");
@@ -153,8 +153,11 @@ namespace StepHeight
             ConsoleUI.WriteLine($"Position of left feature edge: {options.LeftX} {microMeter}");
             ConsoleUI.WriteLine($"Position of right feature edge: {options.RightX} {microMeter}");
             ConsoleUI.WriteLine($"y-value of first profile {options.Y0} {microMeter}");
-            ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} {microMeter}");
-            ConsoleUI.WriteLine($"Residual threshold for discarding: {options.MaxSpan} {microMeter}");
+            if (options.DeltaY > bcrReaderA.RasterData.ScanFieldDimensionY * 1e6)
+                ConsoleUI.WriteLine($"Width of y-band to evaluate: infinity");
+            else
+                ConsoleUI.WriteLine($"Width of y-band to evaluate: {options.DeltaY} {microMeter}");
+            ConsoleUI.WriteLine($"Threshold for residuals: {options.MaxSpan} {microMeter}");
             #endregion
 
             #region Fit requested profiles
@@ -167,8 +170,10 @@ namespace StepHeight
                 double y = bcrReaderA.GetPointFor(0, profileIndex).Y;
                 if (y >= yStart && y <= yEnd)
                 {
-                    Point3D[] currentProfile = PrepareProfile(profileIndex, bcrReaderA, bcrReaderB, bcrReaderC);
+                    Point3D[] currentProfile = ExtractProfile(profileIndex, bcrReaderA, bcrReaderB, bcrReaderC);
                     fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6);
+                    if (fitVerticalStandard.Status == FitStatus.BadEdgePosition)
+                        ConsoleUI.ErrorExit("!Location of feature edge outside fom profile", 30);
                     featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
@@ -297,7 +302,7 @@ namespace StepHeight
 
         //=====================================================================
 
-        private static Point3D[] PrepareProfile(int profileIndex, BcrReader bcrReaderA, BcrReader bcrReaderB, BcrReader bcrReaderC)
+        private static Point3D[] ExtractProfile(int profileIndex, BcrReader bcrReaderA, BcrReader bcrReaderB, BcrReader bcrReaderC)
         {
             if (bcrReaderA == null)
                 ConsoleUI.ErrorExit("!This should not happen", 20);
