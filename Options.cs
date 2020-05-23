@@ -12,10 +12,10 @@ namespace StepHeight
         [Option("multifile", HelpText = "Use three separate input files")]
         public bool Multifile { get; set; }
 
-        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first edge of feature, in um")]
+        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first feature edge, in um")]
         public double LeftX { get; set; }
 
-        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second edge of feature, in um")]
+        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second feature edge, in um")]
         public double RightX { get; set; }
 
         [Option("W1", DefaultValue = 3.0, HelpText = "Parameter W1 of evaluation region")]
