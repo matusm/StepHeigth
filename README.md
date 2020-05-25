@@ -50,6 +50,13 @@ StepHeight inputfile [outputfile] [plotfile] [options]
 
 6: falling step
 
+## Dimensional Parameters
+W1 W2 W3
+X1, X2
+Coordinate origin
+
+## Multiple File Input
+It may be necessary to divide the scan field to separate files. Some scan techniques do not work with very steep flanks, so the bottom and the reference surface must be recorded separately. By using the `--multifile` option it is possible to handle this case also. 
 
 ## Dependencies  
 Bev.SurfaceRasterData:  https://github.com/matusm/Bev.SurfaceRasterData  
