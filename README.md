@@ -1,18 +1,35 @@
 StepHeigth
 ==========
-A standalone command line tool to evaluate surface topography files of step-height or groove standards for the required parameter (the depth or the height). Surface data files are provided as BCR files with .sdf file name extension. This file format is defined in ISO 25178-7, ISO 25178-71 and EUNA 15178 and is quite common in the surface texture comunity.
+A standalone command line tool to evaluate surface topography files of step-height or groove standards for the required parameter (the depth or the height). Surface data files are provided as BCR files with .sdf file name extension. This file format is defined in ISO 25178-7, ISO 25178-71 and EUNA 15178 and is very common in the surface texture comunity.
 
-Subject of this analysis are depth setting standards as defined in ISO 5436-1. The relevant features are rectangular (type A1) or cylindrical (type A2) grooves or ridges relative to the nominally flat reference part. The actual evaluation is performed on a per profile basis. The profiles are not referenced to each other, i.e. the fit is purly 2D on lines.
+Subject of this analysis are depth setting standards as defined in ISO 5436-1. The relevant features are rectangular (type A1) or cylindrical (type A2) grooves or ridges relative to the nominally flat reference part. The actual evaluation is performed on a per profile basis. The profiles are not referenced to each other, i.e. the fit is purly on separated 2D lines.
 
-The data provided by the input file is used as such, no leveling or spatial filtering is provided by this tool. If data processing is needed one can use different software manipulating the BCR files.
+The surface data provided by the input file is used as such, no leveling or spatial filtering is performed by this tool. If needed, processing must take place prior to writing the BCR file.
 
-## Command Line Usage:  
+## Defining Feature
+
+### Feature Type
+The kind of feature must be provided by the `--type (-t)` command line option.
+
+### Location
+The location is set by the positions of its two edges (for steps a single edge only). The edge positions must be defined by the `--X1` and `--X2` command line options.
+
+Trapezoid features...
+
+Vertical features... 
+
+Edges paralell to the y axis of the scan field.
+
+### Fit Region
+The locations of the fit regions (A, B, C according to ISO 5436-1) are defined relative to the edge positions. The distance between the edges (the feature width *W*) defines the unit scale for the  parameters *W*1, *W*2 and *W*3. Due to the definition of the three parameters the fit regions are symmetric to the feature edges.
+
+## Command Line Usage  
 
 ```
 StepHeight inputfile [outputfile] [plotfile] [options]
 ```
 
-## Options:  
+## Options
 
 `--multifile` : Use three separate input files.
 
@@ -20,11 +37,11 @@ StepHeight inputfile [outputfile] [plotfile] [options]
 
 `--X2` : x-value of second feature edge, in µm.
 
-`--W1` : Parameter W1 of evaluation region (default 3).
+`--W1` : Parameter *W*1 of evaluation region (default 3).
 
-`--W2` : Parameter W2 of evaluation region (default 2/3).
+`--W2` : Parameter *W*2 of evaluation region (default 2/3).
 
-`--W3` : Parameter W3 of evaluation region (default 1/3).
+`--W3` : Parameter *W*3 of evaluation region (default 1/3).
 
 `--Y0` : y coordinate value of first profile, in µm.
 
