@@ -1,6 +1,6 @@
 StepHeigth
 ==========
-A standalone command line tool to evaluate surface topography files of step-height or groove standards for the required parameter. Surface data files must be provided according to ISO 25178-7, ISO 25178-71 and EUNA 15178 (BCR).
+A standalone command line tool to evaluate surface topography files of step-height or groove standards for the required parameter (the depth or the height). Surface data files are provided as BCR files. This format is defined in ISO 25178-7, ISO 25178-71 and EUNA 15178.
 
 ## Command Line Usage:  
 
@@ -22,15 +22,15 @@ StepHeight inputfile [outputfile] [plotfile] [options]
 
 `--W3` : Parameter W3 of evaluation region (default 1/3).
 
-`--Y0` : y-value of first profile, in µm.
+`--Y0` : y coordinate value of first profile, in µm.
 
-`--Ywidth` : Width of y band to evaluate, in µm
+`--Ywidth` : Width of y band of profiles which should be considered, in µm
 
-`--maxspan` : Discard fit if residuals are larger than this value, in µm.
+`--maxspan` : Discard fit if range of residuals exceed this value for a given profile, in µm.
 
-`--outextension` : Extension for output file.
+`--outextension` : File name extension for output file.
 
-`--resextension` : Extension for residual file.
+`--resextension` : File name xtension for residual plot file.
 
 `--quiet (-q)` : Quiet mode. No console output (except for errors).
 

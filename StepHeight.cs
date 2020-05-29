@@ -15,6 +15,7 @@ namespace StepHeight
         {
             const string microMeter = "µm"; // or "um"
             ScanFieldTopology scanFieldTopology = ScanFieldTopology.Unknown;
+            // not clear what happens in multithread environments
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             // parse command line arguments
