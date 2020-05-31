@@ -4,24 +4,19 @@ A standalone command line tool to evaluate surface topography files of step-heig
 
 Subject of this analysis are depth setting standards as defined in ISO 5436-1. The relevant features are rectangular (type A1) or cylindrical (type A2) grooves or ridges relative to the nominally flat reference part. The actual evaluation is performed on a per profile basis. The profiles are not referenced to each other, i.e. the fit is purly on separated 2D lines.
 
-The surface data provided by the input file is used as such, no leveling or spatial filtering is performed by this tool. If needed, processing must take place prior to writing the BCR file.
+The surface data provided by the input file is used as such, no leveling or spatial filtering is performed by this tool. If needed, processing must take place prior to saving the BCR file.
 
-## Defining Feature
+## Setting and Defining Feature
+The grooves and steps must be parallel to the y axis of the scan field in order to be processed. 
 
 ### Feature Type
-The kind of feature must be provided by the `--type (-t)` command line option.
+The kind of feature to be fitted must be provided by the `--type (-t)` command line option.
 
 ### Location
-The location is set by the positions of its two edges (for steps a single edge only). The edge positions must be defined by the `--X1` and `--X2` command line options.
-
-Trapezoid features...
-
-Vertical features... 
-
-Edges paralell to the y axis of the scan field.
+The location is set by the positions of its two edges (for steps a single edge only). The edge positions must be set by the `--X1` and `--X2` command line options. The numerical values are given in units of µm, the origin is the left side of the scan field.
 
 ### Fit Region
-The locations of the fit regions (A, B, C according to ISO 5436-1) are defined relative to the edge positions. The distance between the edges (the feature width *W*) defines the unit scale for the  parameters *W*1, *W*2 and *W*3. Due to the definition of the three parameters the fit regions are symmetric to the feature edges.
+The locations of the fit regions (A, B, C according to ISO 5436-1) are defined relative to the edge positions. The distance between the edges (the feature width *W*) defines the unit scale for the  parameters *W*1, *W*2 and *W*3 which are thus multiples or fractions of *W*. Due to the definition of the three parameters the fit regions are symmetric to the feature edges.
 
 ## Command Line Usage  
 
@@ -71,13 +66,16 @@ StepHeight inputfile [outputfile] [plotfile] [options]
 
 6: falling step
 
-## Dimensional Parameters
-W1 W2 W3
-X1, X2
-Coordinate origin
-
 ## Multiple File Input
-It may be necessary to divide the scan field to separate files. Some scan techniques do not work with very steep flanks, so the bottom and the reference surface must be recorded separately. By using the `--multifile` option it is possible to handle this case also. 
+Some scan techniques do not work with very steep flanks, so the bottom and the reference surface must be recorded separately. By using the `--multifile` option it is possible to handle this case. The scan field consists of separate files. Some conditions must be considered:
+
+* The file names must end with A, B and C, respectively.
+
+* The scan parameters of the three files must be compatible. Technically this is check by comparing the number of profiles. 
+
+* All files must have the key `ScanFieldOriginX` in their trailer section. The coresponding value must be in m. This value is used to reference the separate scan fields.
+
+* When using Nmm2Bcr it is essential to that the scan direction must be the x-axis of the NMM-1. 
 
 ## Dependencies  
 Bev.SurfaceRasterData:  https://github.com/matusm/Bev.SurfaceRasterData  
