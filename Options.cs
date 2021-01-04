@@ -45,7 +45,7 @@ namespace StepHeight
         [Option("outextension", DefaultValue = "prn", HelpText = "Extension for output file")]
         public string OutFileExt { get; set; }
 
-        [Option("resextension", DefaultValue = "txt", HelpText = "Extension for residual file")]
+        [Option("resextension", DefaultValue = "csv", HelpText = "Extension for residual file")]
         public string ResFileExt { get; set; }
 
 
