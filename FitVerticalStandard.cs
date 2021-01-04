@@ -9,7 +9,6 @@ namespace StepHeight
     {
         private int featureFitSign; // necessary for groove/ridge handling
 
-        #region Constructor
         public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC)
         {
             ResetProperties();
@@ -19,9 +18,7 @@ namespace StepHeight
             DomainLengthA = lengthA; // single profile length on reference part (2/3 W) 
             DomainLengthC = lengthC; // length of evaluated profile at trench (1/3 W)
         }
-        #endregion
 
-        #region Properties
         // imutable properties set by the constructor
         public FitStatus Status { get; private set; }
         public FeatureType FeatureType { get; private set; }// type of feature to be fitted
@@ -42,9 +39,6 @@ namespace StepHeight
         public bool ProfileTooShort { get; private set; }   // profile does not cover fit region
         public Point3D[] Residuals { get; private set; }    // residuals (in z direction) over the defined domain {A B C}
         public Point3D[] PredictedFunction { get; private set; } // the predicted function over the defined domain {A B C}
-        #endregion
-
-        #region Public methods
 
         public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition)
         {
@@ -85,9 +79,7 @@ namespace StepHeight
             Status = FitStatus.Success;
         }
 
-        #endregion
 
-        #region Private methods
 
         // fit algorithms
 
@@ -436,8 +428,6 @@ namespace StepHeight
             PredictedFunction = null;
             Status = FitStatus.Unknown;
         }
-
-        #endregion
     }
 
     public enum FeatureType
