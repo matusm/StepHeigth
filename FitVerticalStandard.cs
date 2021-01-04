@@ -116,7 +116,7 @@ namespace StepHeight
                     deltaData[i] = -featureFitSign; // region C
             }
 
-            // first the summs
+            // build the summs
             double SigmaX = 0, SigmaY = 0, SigmaXX = 0, SigmaXY = 0, deltaSigmaX = 0, deltaSigmaY = 0;
             int Num = 0, deltaNum = 0;
             for (int i = 0; i < deltaData.Length; i++)
