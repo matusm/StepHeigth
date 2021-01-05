@@ -23,9 +23,9 @@ namespace StepHeight
         public FitStatus Status { get; private set; }
         public FeatureType FeatureType { get; private set; }// type of feature to be fitted
         public string FeatureTypeDesignation => GetDesignationForFeatureType(FeatureType);
-        public double DomainLengthA { get; private set; }    	    // normalized reference evaluation length (2/3)
-        public double DomainLengthC { get; private set; }         // normalized feature evaluation length (1/3)
-        public double DomainLengthE { get; private set; }         // normalized overall evaluation length (3)
+        public double DomainLengthA { get; private set; }   // normalized reference evaluation length (2/3)
+        public double DomainLengthC { get; private set; }   // normalized feature evaluation length (1/3)
+        public double DomainLengthE { get; private set; }   // normalized overall evaluation length (3)
         // computed properties after calling FitProfile
         public double FeatureWidth { get; private set; }    // feature width, W
         public double Yposition { get; private set; }       // position of profile in transverse direction
