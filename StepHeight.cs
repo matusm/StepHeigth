@@ -337,13 +337,13 @@ namespace StepHeight
             if (fitStatistics.AverageResidualPlot != null)
             {
                 StringBuilder plot = new StringBuilder();
-                plot.AppendLine($"x coordinate in {microMeter} {separator} average fit residuals in nm");
+                plot.AppendLine($"x coordinate in {microMeter}{separator}average fit residuals in nm");
 
                 foreach (var point in fitStatistics.AverageResidualPlot)
                 {
                     double x = point.X * 1e6;
                     double z = point.Z * 1e9;
-                    plot.AppendLine($"{x,10:F3} {separator} {z,10:F3}");
+                    plot.AppendLine($"{x,10:F3}{separator}{z,10:F3}");
                 }
                 // and now write to file
                 ConsoleUI.WritingFile(residualsFileName);
