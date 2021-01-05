@@ -52,7 +52,7 @@ namespace StepHeight
                 outputFileName = Path.ChangeExtension(fileNames[1], options.OutFileExt);
                 residualsFileName = Path.ChangeExtension(fileNames[1], options.ResFileExt);
             }
-            if (fileNames.Length >= 2)
+            if (fileNames.Length > 2)
             { // three filenames given
                 outputFileName = Path.ChangeExtension(fileNames[1], options.OutFileExt);
                 residualsFileName = Path.ChangeExtension(fileNames[2], options.ResFileExt);
