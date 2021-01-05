@@ -343,7 +343,7 @@ namespace StepHeight
                 {
                     double x = point.X * 1e6;
                     double z = point.Z * 1e9;
-                    plot.AppendLine($"{x}{separator}{z}");
+                    plot.AppendLine($"{x}{separator}{z:F3}");
                 }
                 // and now write to file
                 ConsoleUI.WritingFile(residualsFileName);
