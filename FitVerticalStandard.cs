@@ -7,7 +7,7 @@ namespace StepHeight
 {
     public class FitVerticalStandard
     {
-        private int featureFitSign; // necessary for groove/ridge handling
+        private readonly int featureFitSign; // necessary for groove/ridge handling
 
         public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC)
         {
@@ -19,14 +19,14 @@ namespace StepHeight
             DomainLengthC = lengthC; // length of evaluated profile at trench (1/3 W)
         }
 
-        // imutable properties set by the constructor
+        // immutable properties set by the constructor
         public FitStatus Status { get; private set; }
         public FeatureType FeatureType { get; private set; }// type of feature to be fitted
         public string FeatureTypeDesignation => GetDesignationForFeatureType(FeatureType);
         public double DomainLengthA { get; private set; }   // normalized reference evaluation length (2/3)
         public double DomainLengthC { get; private set; }   // normalized feature evaluation length (1/3)
         public double DomainLengthE { get; private set; }   // normalized overall evaluation length (3)
-        // computed properties after calling FitProfile
+        // computed properties after calling FitProfile()
         public double FeatureWidth { get; private set; }    // feature width, W
         public double Yposition { get; private set; }       // position of profile in transverse direction
         public double Height { get; private set; }          // height of the feature as obtained by fit
@@ -61,25 +61,37 @@ namespace StepHeight
                 return;
             }
             // probably one should center the profile in x and z direction
+            // center profile to feature, this avoids numerical instability with large X values
+            double featureCenter = (leftEdgePosition + rightEdgePosition) / 2.0;
+            Point3D[] shiftedProfile = ShiftProfile(filteredProfile, featureCenter);
+
             switch (FeatureType)
             {
                 case FeatureType.A1Groove:
                 case FeatureType.A1Ridge:
-                    FitA1(filteredProfile, leftEdgePosition, rightEdgePosition);
+                    FitA1(shiftedProfile, leftEdgePosition - featureCenter, rightEdgePosition - featureCenter);
                     break;
                 case FeatureType.A2Groove:
                 case FeatureType.A2Ridge:
-                    FitA2(filteredProfile, leftEdgePosition, rightEdgePosition);
+                    FitA2(shiftedProfile, leftEdgePosition - featureCenter, rightEdgePosition - featureCenter);
                     break;
                 case FeatureType.FallingEdge:
                 case FeatureType.RisingEdge:
-                    FitEdge(filteredProfile, leftEdgePosition);
+                    FitEdge(shiftedProfile, leftEdgePosition - featureCenter);
                     break;
             }
             Status = FitStatus.Success;
         }
 
-
+        private Point3D[] ShiftProfile(Point3D[] profile, double center)
+        {
+            List<Point3D> points = new List<Point3D>();
+            foreach (var p in profile)
+            {
+                points.Add(new Point3D(p.X - center, p.Y, p.Z));
+            }
+            return points.ToArray();
+        }
 
         // fit algorithms
 
@@ -320,6 +332,7 @@ namespace StepHeight
         {
             FeatureWidth = 0.0;
             Console.WriteLine("FitEdge() not yet implemented!");
+            throw new NotImplementedException();
         }
 
         // helper functions
