@@ -14,7 +14,6 @@ namespace StepHeight
         public static void Main(string[] args)
         {
             const string microMeter = "µm"; // or "um"
-            const string separator = ",";   // or ";" or "\t"
             ScanFieldTopology scanFieldTopology = ScanFieldTopology.Unknown;
             // not clear what happens in multithread environments
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -337,13 +336,13 @@ namespace StepHeight
             if (fitStatistics.AverageResidualPlot != null)
             {
                 StringBuilder plot = new StringBuilder();
-                plot.AppendLine($"x coordinate in {microMeter}{separator}average fit residuals in nm");
+                plot.AppendLine($"x coordinate in {microMeter}{options.Separator}average fit residuals in nm");
 
                 foreach (var point in fitStatistics.AverageResidualPlot)
                 {
                     double x = point.X * 1e6;
                     double z = point.Z * 1e9;
-                    plot.AppendLine($"{x}{separator}{z:F3}");
+                    plot.AppendLine($"{x}{options.Separator}{z:F3}");
                 }
                 // and now write to file
                 ConsoleUI.WritingFile(residualsFileName);

@@ -48,6 +48,9 @@ namespace StepHeight
         [Option("resextension", DefaultValue = "csv", HelpText = "Extension for residual file")]
         public string ResFileExt { get; set; }
 
+        [Option("separator", DefaultValue = ",", HelpText = "Separator for CSV file")]
+        public string Separator { get; set; }
+
 
 
         [ValueList(typeof(List<string>), MaximumElements = 3)]
