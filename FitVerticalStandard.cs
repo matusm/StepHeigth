@@ -412,10 +412,7 @@ namespace StepHeight
             List<Point3D> filteredProfile = new List<Point3D>();
             foreach (var point in pointProfile)
             {
-                bool isValid = true;
-                isValid = isValid && !double.IsNaN(point.Z);
-                isValid = isValid && !double.IsNaN(point.X);
-
+                bool isValid = !double.IsNaN(point.Z) && !double.IsNaN(point.X);
                 if (isValid)
                     filteredProfile.Add(point);
             }
