@@ -7,11 +7,11 @@ namespace StepHeight
     public class FitStatistics
     {
 
-        private FitVerticalStandard fvs;
-        private List<double> h = new List<double>();
-        private List<double> pt = new List<double>();
-        private List<double> r = new List<double>();
-        private List<double> res = new List<double>();
+        private readonly FitVerticalStandard fvs;
+        private readonly List<double> h = new List<double>();
+        private readonly List<double> pt = new List<double>();
+        private readonly List<double> r = new List<double>();
+        private readonly List<double> res = new List<double>();
         private Point3D[] sumOfResidualPlots;
         private int numberOfResidualPlots;
 

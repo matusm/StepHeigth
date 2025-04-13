@@ -359,10 +359,7 @@ namespace StepHeight
             return min;
         }
 
-        private double RangeZfor(List<Point3D> profile)
-        {
-            return MaxZfor(profile) - MinZfor(profile);
-        }
+        private double RangeZfor(List<Point3D> profile) => MaxZfor(profile) - MinZfor(profile);
 
         private int GetFeatureFitSignForFeatureType(FeatureType featureType)
         {
