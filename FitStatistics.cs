@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using At.Matus.StatisticPod;
 using Bev.SurfaceRasterData;
 
 namespace StepHeight
@@ -8,10 +7,10 @@ namespace StepHeight
     {
 
         private readonly FitVerticalStandard fvs;
-        private readonly List<double> h = new List<double>();
-        private readonly List<double> pt = new List<double>();
-        private readonly List<double> r = new List<double>();
-        private readonly List<double> res = new List<double>();
+        private readonly StatisticPod heightPod = new StatisticPod();
+        private readonly StatisticPod ptPod = new StatisticPod();
+        private readonly StatisticPod radiusPod = new StatisticPod();
+        private readonly StatisticPod residualRangePod = new StatisticPod();
         private Point3D[] sumOfResidualPlots;
         private int numberOfResidualPlots;
 
@@ -21,31 +20,31 @@ namespace StepHeight
             Restart();
         }
 
-        public int NumberOfSamples => h.Count;
-        public double AverageHeight => h.Average();
-        public double HeightRange => h.Max() - h.Min();
-        public double AveragePt => pt.Average();
-        public double PtRange => pt.Max() - pt.Min();
-        public double AverageA2Radius => r.Average();
-        public double A2RadiusRange => r.Max() - r.Min();
-        public double AverageResiduals => res.Average();
+        public int NumberOfSamples => (int)heightPod.SampleSize;
+        public double AverageHeight => heightPod.AverageValue;
+        public double HeightRange => heightPod.Range;
+        public double AveragePt => ptPod.AverageValue;
+        public double PtRange => ptPod.Range;
+        public double AverageA2Radius => radiusPod.AverageValue;
+        public double A2RadiusRange => radiusPod.Range;
+        public double AverageResiduals => residualRangePod.AverageValue;
         public Point3D[] AverageResidualPlot => GetAverageResidualPlot();
 
         public void Update()
         {
-            h.Add(fvs.Height);
-            pt.Add(fvs.Pt);
-            res.Add(fvs.RangeOfResiduals);
-            r.Add(fvs.A2Radius);
+            heightPod.Update(fvs.Height);
+            ptPod.Update(fvs.Pt);
+            residualRangePod.Update(fvs.RangeOfResiduals);
+            radiusPod.Update(fvs.A2Radius);
             UpdateResidualsPlot();
         }
 
         public void Restart()
         {
-            h.Clear();
-            pt.Clear();
-            r.Clear();
-            res.Clear();
+            heightPod.Restart();
+            ptPod.Restart();
+            radiusPod.Restart();
+            residualRangePod.Restart();
             sumOfResidualPlots = null;
             numberOfResidualPlots = 0;
         }

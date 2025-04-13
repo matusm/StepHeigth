@@ -37,6 +37,9 @@
     <ExternalConsole>false</ExternalConsole>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="At.Matus.StatisticPod">
+      <HintPath>..\At.Matus.StatisticPod\bin\Release\At.Matus.StatisticPod.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Bev.IO.BcrReader">
       <HintPath>..\Bev.IO.BcrReader\bin\Release\Bev.IO.BcrReader.dll</HintPath>
