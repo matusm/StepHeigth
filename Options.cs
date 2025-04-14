@@ -9,46 +9,49 @@ namespace StepHeight
         [Option('t', "type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
         public int TypeIndex { get; set; }
 
-        [Option("multifile", HelpText = "Use three separate input files")]
+        [Option("multifile", HelpText = "Use three separate input files.")]
         public bool Multifile { get; set; }
 
-        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first feature edge, in um")]
+        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first feature edge, in µm.")]
         public double LeftX { get; set; }
 
-        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second feature edge, in um")]
+        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second feature edge, in µm.")]
         public double RightX { get; set; }
 
-        [Option("W1", DefaultValue = 3.0, HelpText = "Parameter W1 of evaluation region")]
+        [Option("W1", DefaultValue = 3.0, HelpText = "Parameter W1 of evaluation region.")]
         public double W1 { get; set; }
 
-        [Option("W2", DefaultValue = (2.0 / 3.0), HelpText = "Parameter W2 of evaluation region")]
+        [Option("W2", DefaultValue = (2.0 / 3.0), HelpText = "Parameter W2 of evaluation region.")]
         public double W2 { get; set; }
 
-        [Option("W3", DefaultValue = (1.0 / 3.0), HelpText = "Parameter W3 of evaluation region")]
+        [Option("W3", DefaultValue = (1.0 / 3.0), HelpText = "Parameter W3 of evaluation region.")]
         public double W3 { get; set; }
 
-        [Option("Y0", DefaultValue = 0.0, HelpText = "y-value of first profile, in um")]
+        [Option("SW", DefaultValue = (0), HelpText = "x-length of inclined side wall. For trapezoidal features only. ")]
+        public double SW { get; set; }
+
+        [Option("Y0", DefaultValue = 0.0, HelpText = "y-value of first profile, in µm.")]
         public double Y0 { get; set; }
 
-        [Option("Ywidth", DefaultValue = double.MaxValue, HelpText = "Width of y band to evaluate, in um")]
+        [Option("Ywidth", DefaultValue = double.MaxValue, HelpText = "Width of y band to evaluate, in µm.")]
         public double DeltaY { get; set; }
 
-        [Option('q', "quiet", HelpText = "Quiet mode. No screen output (except for errors)")]
+        [Option('q', "quiet", HelpText = "Quiet mode. No screen output (except for errors.)")]
         public bool BeQuiet { get; set; }
 
-        [Option("comment", DefaultValue = "---", HelpText = "User supplied comment string")]
+        [Option("comment", DefaultValue = "---", HelpText = "User supplied comment strin.")]
         public string UserComment { get; set; }
 
-        [Option("maxspan", DefaultValue = 0.1, HelpText = "Discard fit if residuals are larger, in um")]
+        [Option("maxspan", DefaultValue = 0.1, HelpText = "Discard fit if residuals are larger, in µm")]
         public double MaxSpan { get; set; }
 
-        [Option("outextension", DefaultValue = "prn", HelpText = "Extension for output file")]
+        [Option("outextension", DefaultValue = "prn", HelpText = "Extension for output file.")]
         public string OutFileExt { get; set; }
 
-        [Option("resextension", DefaultValue = "csv", HelpText = "Extension for residual file")]
+        [Option("resextension", DefaultValue = "csv", HelpText = "Extension for residual file.")]
         public string ResFileExt { get; set; }
 
-        [Option("separator", DefaultValue = ",", HelpText = "Separator for CSV file")]
+        [Option("separator", DefaultValue = ",", HelpText = "Separator for CSV file.")]
         public string Separator { get; set; }
 
 

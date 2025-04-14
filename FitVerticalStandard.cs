@@ -9,7 +9,8 @@ namespace StepHeight
     {
         private readonly int featureFitSign; // necessary for groove/ridge handling
 
-        public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC)
+
+        public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC, double inclination)
         {
             ResetProperties();
             FeatureType = featureType;
@@ -17,15 +18,19 @@ namespace StepHeight
             DomainLengthE = lengthE; // overall length region to be used (3 W)
             DomainLengthA = lengthA; // single profile length on reference part (2/3 W) 
             DomainLengthC = lengthC; // length of evaluated profile at trench (1/3 W)
+            InclinationLength = inclination; // // length of inclined side wall (in µm)
         }
+
+        public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC) : this(featureType, lengthE, lengthA, lengthC, 0) { }
 
         // immutable properties set by the constructor
         public FitStatus Status { get; private set; }
-        public FeatureType FeatureType { get; private set; }// type of feature to be fitted
+        public FeatureType FeatureType { get; }// type of feature to be fitted
         public string FeatureTypeDesignation => GetDesignationForFeatureType(FeatureType);
-        public double DomainLengthA { get; private set; }   // normalized reference evaluation length (2/3)
-        public double DomainLengthC { get; private set; }   // normalized feature evaluation length (1/3)
-        public double DomainLengthE { get; private set; }   // normalized overall evaluation length (3)
+        public double DomainLengthA { get; }   // normalized reference evaluation length (2/3)
+        public double DomainLengthC { get; }   // normalized feature evaluation length (1/3)
+        public double DomainLengthE { get; }   // normalized overall evaluation length (3)
+        public double InclinationLength { get; } // length of inclined side wall (in µm), makes only sense for A1 and Edge
         // computed properties after calling FitProfile()
         public double FeatureWidth { get; private set; }    // feature width, W
         public double Yposition { get; private set; }       // position of profile in transverse direction
@@ -60,7 +65,6 @@ namespace StepHeight
                 Status = FitStatus.BadEdgePosition;
                 return;
             }
-            // probably one should center the profile in x and z direction
             // center profile to feature, this avoids numerical instability with large X values
             double featureCenter = (leftEdgePosition + rightEdgePosition) / 2.0;
             Point3D[] shiftedProfile = ShiftProfile(filteredProfile, featureCenter);
