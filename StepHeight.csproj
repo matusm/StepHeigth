@@ -40,6 +40,9 @@
     <Reference Include="At.Matus.StatisticPod">
       <HintPath>..\At.Matus.StatisticPod\bin\Release\At.Matus.StatisticPod.dll</HintPath>
     </Reference>
+    <Reference Include="Bev.UI">
+      <HintPath>..\Bev.UI.ConsoleUI\Bev.UI\bin\Release\Bev.UI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Bev.IO.BcrReader">
       <HintPath>..\Bev.IO.BcrReader\bin\Release\Bev.IO.BcrReader.dll</HintPath>
@@ -55,7 +58,6 @@
     <Compile Include="StepHeight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="MyLibs\ConsoleUI.cs" />
     <Compile Include="FitVerticalStandard.cs" />
     <Compile Include="FitStatistics.cs" />
   </ItemGroup>

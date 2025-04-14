@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using Bev.IO.BcrReader;
 using Bev.SurfaceRasterData;
+using Bev.UI;
 
 namespace StepHeight
 {
