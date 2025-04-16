@@ -10,7 +10,7 @@ namespace StepHeight
         private readonly int featureFitSign; // necessary for groove/ridge handling
 
 
-        public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC, double inclination)
+        public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC)
         {
             ResetProperties();
             FeatureType = featureType;
@@ -18,10 +18,7 @@ namespace StepHeight
             DomainLengthE = lengthE; // overall length region to be used (3 W)
             DomainLengthA = lengthA; // single profile length on reference part (2/3 W) 
             DomainLengthC = lengthC; // length of evaluated profile at trench (1/3 W)
-            InclinationLength = inclination; // // length of inclined side wall (in µm)
         }
-
-        public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC) : this(featureType, lengthE, lengthA, lengthC, 0) { }
 
         // immutable properties set by the constructor
         public FitStatus Status { get; private set; }
@@ -45,7 +42,10 @@ namespace StepHeight
         public Point3D[] Residuals { get; private set; }    // residuals (in z direction) over the defined domain {A B C}
         public Point3D[] PredictedFunction { get; private set; } // the predicted function over the defined domain {A B C}
 
-        public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition)
+
+        public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition) => FitProfile(profile, leftEdgePosition, rightEdgePosition, 0, 0);
+
+        public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition, double leftWallPosition, double rightWallPosition)
         {
             ResetProperties();
             Point3D[] filteredProfile = RemoveBadPoints(profile);
@@ -377,6 +377,10 @@ namespace StepHeight
                     return +1;
                 case FeatureType.A2Ridge:
                     return -1;
+                case FeatureType.A1TrapGroove:
+                    return +1;
+                case FeatureType.A1TrapRidge:
+                    return -1;
                 case FeatureType.RisingEdge:
                     return -1;
                 case FeatureType.FallingEdge:
@@ -400,6 +404,10 @@ namespace StepHeight
                     return "ISO 5436-1 Type A2 (cylindrical groove)"; //+
                 case FeatureType.A2Ridge:
                     return "Inverted ISO 5436-1 Type A2 (cylindrical ridge)"; //-
+                case FeatureType.A1TrapGroove:
+                    return "ISO 5436-1 Type A1 (trapezoidal groove)"; //+
+                case FeatureType.A1TrapRidge:
+                    return "Inverted ISO 5436-1 Type A1 (trapezoidal ridge)"; //-
                 case FeatureType.RisingEdge:
                     return "Single edge (low->high)"; //-
                 case FeatureType.FallingEdge:
@@ -441,22 +449,5 @@ namespace StepHeight
         }
     }
 
-    public enum FeatureType
-    {
-        None,
-        A1Groove,   // ISO 5436-1 Type A1 (rectangular groove)
-        A2Groove,   // ISO 5436-1 Type A2 (cylindrical groove)
-        A1Ridge,    // ISO 5436-1 Type A1 (rectangular step)
-        A2Ridge,    // ISO 5436-1 Type A2 (cylindrical ridge), uncommon
-        RisingEdge, // single edge low->high
-        FallingEdge // single edge high->low
-    }
 
-    public enum FitStatus
-    {
-        Unknown,
-        Success,
-        BadEdgePosition,
-        NoData
-    }
 }

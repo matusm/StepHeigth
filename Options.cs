@@ -6,17 +6,25 @@ namespace StepHeight
 {
     public class Options
     {
+        public FeatureType Type => GetFeatureTypeFor(TypeIndex);
+
         [Option('t', "type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
         public int TypeIndex { get; set; }
 
         [Option("multifile", HelpText = "Use three separate input files.")]
         public bool Multifile { get; set; }
 
-        [Option("X1", DefaultValue = 0.0, HelpText = "x-value of first feature edge, in µm.")]
+        [Option("X1", DefaultValue = 0, HelpText = "x-value of first feature edge, in µm.")]
         public double LeftX { get; set; }
 
-        [Option("X2", DefaultValue = 0.0, HelpText = "x-value of second feature edge, in µm.")]
+        [Option("X2", DefaultValue = 0, HelpText = "x-value of second feature edge, in µm.")]
         public double RightX { get; set; }
+
+        [Option("U1", DefaultValue = 0, HelpText = "x-value of first feature wall, in µm. For trapezoidal features only.")]
+        public double LeftU { get; set; }
+
+        [Option("U2", DefaultValue = 0, HelpText = "x-value of second feature wall, in µm. For trapezoidal features only.")]
+        public double RightU { get; set; }
 
         [Option("W1", DefaultValue = 3.0, HelpText = "Parameter W1 of evaluation region.")]
         public double W1 { get; set; }
@@ -27,9 +35,6 @@ namespace StepHeight
         [Option("W3", DefaultValue = (1.0 / 3.0), HelpText = "Parameter W3 of evaluation region.")]
         public double W3 { get; set; }
 
-        [Option("SW", DefaultValue = (0), HelpText = "x-length of inclined side wall. For trapezoidal features only. ")]
-        public double SW { get; set; }
-
         [Option("Y0", DefaultValue = 0.0, HelpText = "y-value of first profile, in µm.")]
         public double Y0 { get; set; }
 
@@ -39,7 +44,7 @@ namespace StepHeight
         [Option('q', "quiet", HelpText = "Quiet mode. No screen output (except for errors.)")]
         public bool BeQuiet { get; set; }
 
-        [Option("comment", DefaultValue = "---", HelpText = "User supplied comment strin.")]
+        [Option("comment", DefaultValue = "---", HelpText = "User supplied comment string.")]
         public string UserComment { get; set; }
 
         [Option("maxspan", DefaultValue = 0.1, HelpText = "Discard fit if residuals are larger, in µm")]
@@ -55,6 +60,31 @@ namespace StepHeight
         public string Separator { get; set; }
 
 
+
+        private FeatureType GetFeatureTypeFor(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return FeatureType.A1Ridge;
+                case 2:
+                    return FeatureType.A2Groove;
+                case 3:
+                    return FeatureType.A1Groove;
+                case 4:
+                    return FeatureType.A2Ridge;
+                case 5:
+                    return FeatureType.A1TrapGroove;
+                case 6:
+                    return FeatureType.A1TrapRidge;
+                case 7:
+                    return FeatureType.RisingEdge;
+                case 8:
+                    return FeatureType.FallingEdge;
+                default:
+                    return FeatureType.None;
+            }
+        }
 
         [ValueList(typeof(List<string>), MaximumElements = 3)]
         public IList<string> ListOfFileNames { get; set; }
@@ -85,8 +115,11 @@ namespace StepHeight
             help.AddPostOptionsLine("   2: ISO A2 (cylindrical groove)");
             help.AddPostOptionsLine("   3: ISO A1 (rectangular groove)");
             help.AddPostOptionsLine("   4: ISO A2 (cylindrical ridge)");
-            help.AddPostOptionsLine("   5: rising step");
-            help.AddPostOptionsLine("   6: falling step");
+            help.AddPostOptionsLine("   5: ISO A1 (trapezoidal ridge)");
+            help.AddPostOptionsLine("   6: ISO A1 (trapezoidal groove)");
+            help.AddPostOptionsLine("   7: rising step");
+            help.AddPostOptionsLine("   8: falling step");
+
 
             help.AddOptions(this);
 

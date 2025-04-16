@@ -196,7 +196,7 @@ namespace StepHeight
                 pointsPerProfile = bcrReaderA.NumPoints + bcrReaderB.NumPoints + bcrReaderC.NumPoints;
             }
             // FitVerticalStandard must be called here for getting the feature type designation
-            FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(GetFeatureTypeFor(options.TypeIndex), options.W1, options.W2, options.W3);
+            FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(options.Type, options.W1, options.W2, options.W3);
             ConsoleUI.WriteLine($"Disjoined scan fields: {numberPatches}");
             ConsoleUI.WriteLine($"Number of points per profile: {pointsPerProfile}");
             ConsoleUI.WriteLine($"Number of profiles: {bcrReaderA.NumProfiles}");
@@ -229,7 +229,7 @@ namespace StepHeight
                     fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6);
                     if (fitVerticalStandard.Status == FitStatus.BadEdgePosition)
                         ConsoleUI.ErrorExit("!Feature edge location outside of profile", 30);
-                    if(fitVerticalStandard.Status!=FitStatus.Success)
+                    if(fitVerticalStandard.Status != FitStatus.Success)
                     {
                         ConsoleUI.WriteLine($" > {profileIndex,5} profile discarded ({fitVerticalStandard.Status})");
                         numberDiscardedProfiles++;
@@ -278,7 +278,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"ScanFieldWidth            = {scanFieldWidth * 1e6:F2} {microMeter}");
             reportStringBuilder.AppendLine($"ScanFieldHeight           = {bcrReaderA.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"# Fit parameters =====================================");
-            reportStringBuilder.AppendLine($"FeatureType               = {GetFeatureTypeFor(options.TypeIndex)}");
+            reportStringBuilder.AppendLine($"FeatureType               = {options.Type}");
             reportStringBuilder.AppendLine($"W1                        = {options.W1}");
             reportStringBuilder.AppendLine($"W2                        = {options.W2}");
             reportStringBuilder.AppendLine($"W3                        = {options.W3}");
@@ -298,8 +298,8 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"RangeOfHeights            = {fitStatistics.HeightRange * 1e6:F5} {microMeter}");
             reportStringBuilder.AppendLine($"AveragePt                 = {fitStatistics.AveragePt * 1e6:F5} {microMeter}");
             reportStringBuilder.AppendLine($"RangeOfPt                 = {fitStatistics.PtRange * 1e6:F5} {microMeter}");
-            if (GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Groove ||
-                GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Ridge)
+            if (options.Type == FeatureType.A2Groove ||
+                options.Type == FeatureType.A2Ridge)
             {
                 reportStringBuilder.AppendLine($"AverageRadius             = {fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}");
                 reportStringBuilder.AppendLine($"RangeOfRadii              = {fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}");
@@ -310,8 +310,8 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
             reportStringBuilder.AppendLine($"# 4 : Pt / {microMeter}");
             reportStringBuilder.AppendLine($"# 5 : Range of residuals / {microMeter}");
-            if (GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Groove ||
-                GetFeatureTypeFor(options.TypeIndex) == FeatureType.A2Ridge)
+            if (options.Type == FeatureType.A2Groove ||
+                options.Type == FeatureType.A2Ridge)
             {
                 reportStringBuilder.AppendLine($"# 6 : Radius / {microMeter}");
                 reportStringBuilder.AppendLine($"# 7 : Asymmetry index");
@@ -412,35 +412,5 @@ namespace StepHeight
 
         //=====================================================================
 
-        private static FeatureType GetFeatureTypeFor(int index)
-        {
-            switch (index)
-            {
-                case 1:
-                    return FeatureType.A1Ridge;
-                case 2:
-                    return FeatureType.A2Groove;
-                case 3:
-                    return FeatureType.A1Groove;
-                case 4:
-                    return FeatureType.A2Ridge;
-                case 5:
-                    return FeatureType.RisingEdge;
-                case 6:
-                    return FeatureType.FallingEdge;
-                default:
-                    return FeatureType.None;
-            }
-        }
-
-        //=====================================================================
-    }
-
-    public enum ScanFieldTopology
-    {
-        Unknown,
-        Single,
-        Two,
-        Three
     }
 }
