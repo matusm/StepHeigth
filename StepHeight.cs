@@ -195,12 +195,11 @@ namespace StepHeight
                 numberPatches = 3;
                 pointsPerProfile = bcrReaderA.NumPoints + bcrReaderB.NumPoints + bcrReaderC.NumPoints;
             }
-            // FitVerticalStandard must be called here for getting the feature type designation
-            FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(options.Type, options.W1, options.W2, options.W3);
+
             ConsoleUI.WriteLine($"Disjoined scan fields: {numberPatches}");
             ConsoleUI.WriteLine($"Number of points per profile: {pointsPerProfile}");
             ConsoleUI.WriteLine($"Number of profiles: {bcrReaderA.NumProfiles}");
-            ConsoleUI.WriteLine($"Feature type: {fitVerticalStandard.FeatureTypeDesignation}");
+            ConsoleUI.WriteLine($"Feature type: {FeatureTypeUtils.TypeToString(options.Type)}");
             ConsoleUI.WriteLine($"W1: {options.W1}");
             ConsoleUI.WriteLine($"W2: {options.W2}");
             ConsoleUI.WriteLine($"W3: {options.W3}");
@@ -215,6 +214,7 @@ namespace StepHeight
             #endregion
 
             #region Fit requested profiles
+            FitVerticalStandard fitVerticalStandard = new FitVerticalStandard(options.Type, options.W1, options.W2, options.W3);
             ConsoleUI.WriteLine("Start fitting profiles.");
             int numberDiscardedProfiles = 0;
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);

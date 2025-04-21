@@ -7,7 +7,7 @@ namespace StepHeight
     public class Options
     {
         public FeatureType Type => GetFeatureTypeFor(TypeIndex);
-
+        public string TypeString => FeatureTypeUtils.TypeToString(Type);
         [Option('t', "type", DefaultValue = 1, HelpText = "Feature type to be fitted")]
         public int TypeIndex { get; set; }
 
@@ -59,8 +59,6 @@ namespace StepHeight
         [Option("separator", DefaultValue = ",", HelpText = "Separator for CSV file.")]
         public string Separator { get; set; }
 
-
-
         private FeatureType GetFeatureTypeFor(int index)
         {
             switch (index)
@@ -85,6 +83,7 @@ namespace StepHeight
                     return FeatureType.None;
             }
         }
+
 
         [ValueList(typeof(List<string>), MaximumElements = 3)]
         public IList<string> ListOfFileNames { get; set; }

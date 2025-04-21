@@ -61,6 +61,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="FitVerticalStandard.cs" />
     <Compile Include="FitStatistics.cs" />
+    <Compile Include="FeatureTypeUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
