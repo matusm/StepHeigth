@@ -8,6 +8,7 @@ namespace StepHeight
     public class FitVerticalStandard
     {
         private readonly int featureFitSign; // necessary for groove/ridge handling
+        private readonly FitBoundaries fitBoundaries;
 
         public FitVerticalStandard(FeatureType featureType, double lengthE, double lengthA, double lengthC)
         {
@@ -17,6 +18,7 @@ namespace StepHeight
             DomainLengthE = lengthE; // overall length region to be used (3 W)
             DomainLengthA = lengthA; // single profile length on reference part (2/3 W) 
             DomainLengthC = lengthC; // length of evaluated profile at feature (1/3 W)
+            fitBoundaries = new FitBoundaries(DomainLengthE, DomainLengthA, DomainLengthC);   
         }
 
         // immutable properties set by the constructor
@@ -28,21 +30,21 @@ namespace StepHeight
         public double DomainLengthE { get; }   // normalized overall evaluation length (3)
         public double InclinationLength { get; } // length of inclined side wall (in µm), makes only sense for A1 and Edge
         // computed properties after calling FitProfile()
-        public double FeatureWidth { get; private set; }    // feature width, W
-        public double Yposition { get; private set; }       // position of profile in transverse direction
-        public double Height { get; private set; }          // height of the feature as obtained by fit
-        public double Pt { get; private set; }              // Pt as obtained by fit
-        public double A2Radius { get; private set; }        // geometry parameter for A2 standards
-        public double A2CenterPosition { get; private set; }// geometry parameter for A2 standards
-        public double A2Asymmetry { get; private set; }     // geometry parameter for A2 standards
-        public int NumberOfFitPoints { get; private set; }  // number of points used for fit
-        public double RangeOfResiduals { get; private set; }// range of residuals
-        public bool ProfileTooShort { get; private set; }   // profile does not cover fit region
-        public Point3D[] Residuals { get; private set; }    // residuals (in z direction) over the defined domain {A B C}
-        public Point3D[] PredictedFunction { get; private set; } // the predicted function over the defined domain {A B C}
+        public double FeatureWidth => fitBoundaries.FeatureWidth;   // feature width, W
+        public double Yposition { get; private set; }               // position of profile in transverse direction
+        public double Height { get; private set; }                  // height of the feature as obtained by fit
+        public double Pt { get; private set; }                      // Pt as obtained by fit
+        public double A2Radius { get; private set; }                // geometry parameter for A2 standards
+        public double A2CenterPosition { get; private set; }        // geometry parameter for A2 standards
+        public double A2Asymmetry { get; private set; }             // geometry parameter for A2 standards
+        public int NumberOfFitPoints { get; private set; }          // number of points used for fit
+        public double RangeOfResiduals { get; private set; }        // range of residuals
+        public bool ProfileTooShort { get; private set; }           // profile does not cover fit region
+        public Point3D[] Residuals { get; private set; }            // residuals (in z direction) over the defined domain {A B C}
+        public Point3D[] PredictedFunction { get; private set; }    // the predicted function over the defined domain {A B C}
 
 
-        public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition) => FitProfile(profile, leftEdgePosition, rightEdgePosition, 0, 0);
+        public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition) => FitProfile(profile, leftEdgePosition, rightEdgePosition, leftEdgePosition, rightEdgePosition);
 
         // this overload is used for trapezoidal features
         public void FitProfile(Point3D[] profile, double leftEdgePosition, double rightEdgePosition, double leftWallPosition, double rightWallPosition)
@@ -65,10 +67,9 @@ namespace StepHeight
                 Status = FitStatus.BadEdgePosition;
                 return;
             }
-            // center profile to feature, this avoids numerical instability with large X values
+            // centering the profile to the feature avoids numerical instability with large X values
             double featureCenter = (leftEdgePosition + rightEdgePosition) / 2.0;
             Point3D[] shiftedProfile = ShiftProfile(filteredProfile, featureCenter);
-
             switch (FeatureType)
             {
                 case FeatureType.A1Groove:
@@ -103,70 +104,22 @@ namespace StepHeight
 
         // fit algorithms
 
+        private void FitA1(Point3D[] profile, double leftEdgePosition, double rightEdgePosition) => FitA1Trap(profile, leftEdgePosition, rightEdgePosition, leftEdgePosition, rightEdgePosition);
+
         private void FitA1Trap(Point3D[] profile, double leftEdgePosition, double rightEdgePosition, double leftWallPosition, double rightWallPosition)
         {
-            // check order of edge position and calculate W (= FeatureWidth)
-            if (leftEdgePosition > rightEdgePosition)
-            {
-                double tempEdge = rightEdgePosition;
-                rightEdgePosition = leftEdgePosition;
-                leftEdgePosition = tempEdge;
-            }
-            if (leftWallPosition > rightWallPosition)
-            {
-                double tempWall = rightWallPosition;
-                rightWallPosition = leftWallPosition;
-                leftWallPosition = tempWall;
-            }
-            FeatureWidth = rightEdgePosition - leftEdgePosition;
-            double wallWidth = rightWallPosition - leftWallPosition;
-            double lengthE = DomainLengthE * FeatureWidth;
-            double lengthA = DomainLengthA * FeatureWidth;
-            double lengthC = DomainLengthC * FeatureWidth;
-            double lengthEAll = lengthE + wallWidth - FeatureWidth;
-            double lengthRef = (lengthE - FeatureWidth) / 2.0;
-
-            // generate the six boundary points
-            double x1 = leftWallPosition - lengthRef;
-            double x6 = rightWallPosition + lengthRef;
-            double x2 = x1 + lengthA;
-            double x5 = x6 - lengthA;
-            double x3 = leftEdgePosition + (FeatureWidth - lengthC) / 2.0;
-            double x4 = x3 + lengthC;
-
-            ProfileTooShort = (x1 < profile.First().X || x6 > profile.Last().X);
-        }
-
-        private void FitA1(Point3D[] profile, double leftEdgePosition, double rightEdgePosition)
-        {
-            // check order of edge position and calculate W (= FeatureWidth)
-            if (leftEdgePosition > rightEdgePosition)
-            {
-                double tempEdge = rightEdgePosition;
-                rightEdgePosition = leftEdgePosition;
-                leftEdgePosition = tempEdge;
-            }
-            FeatureWidth = rightEdgePosition - leftEdgePosition;
-
-            // generate the six boundary points
-            double x1 = (rightEdgePosition + leftEdgePosition - DomainLengthE * FeatureWidth) / 2;
-            double x2 = x1 + DomainLengthA * FeatureWidth;
-            double x3 = (rightEdgePosition + leftEdgePosition - DomainLengthC * FeatureWidth) / 2;
-            double x4 = x3 + DomainLengthC * FeatureWidth;
-            double x6 = x1 + DomainLengthE * FeatureWidth;
-            double x5 = x6 - DomainLengthA * FeatureWidth;
-            ProfileTooShort = (x1 < profile.First().X || x6 > profile.Last().X);
-
+            fitBoundaries.GenerateBoundaries(leftEdgePosition, rightEdgePosition, leftWallPosition, rightWallPosition);
+            ProfileTooShort = (fitBoundaries.X1 < profile.First().X || fitBoundaries.X6 > profile.Last().X);
             // populate the delta array
             int[] deltaData = new int[profile.Length];
             for (int i = 0; i < deltaData.Length; i++)
             {
                 deltaData[i] = 0;
-                if ((profile[i].X >= x1) && (profile[i].X <= x2))
+                if ((profile[i].X >= fitBoundaries.X1) && (profile[i].X <= fitBoundaries.X2))
                     deltaData[i] = featureFitSign; // region A
-                if ((profile[i].X >= x5) && (profile[i].X <= x6))
+                if ((profile[i].X >= fitBoundaries.X5) && (profile[i].X <= fitBoundaries.X6))
                     deltaData[i] = featureFitSign; // region B
-                if ((profile[i].X >= x3) && (profile[i].X <= x4))
+                if ((profile[i].X >= fitBoundaries.X3) && (profile[i].X <= fitBoundaries.X4))
                     deltaData[i] = -featureFitSign; // region C
             }
 
@@ -226,30 +179,21 @@ namespace StepHeight
 
         private void FitA2(Point3D[] profile, double leftEdgePosition, double rightEdgePosition)
         {
-            // check order of edge position and calculate W (=dW)
-            if (leftEdgePosition > rightEdgePosition)
-            {
-                double tempEdge = rightEdgePosition;
-                rightEdgePosition = leftEdgePosition;
-                leftEdgePosition = tempEdge;
-            }
-            FeatureWidth = rightEdgePosition - leftEdgePosition;
+            fitBoundaries.GenerateBoundaries(leftEdgePosition, rightEdgePosition);
+            ProfileTooShort = (fitBoundaries.X1 < profile.First().X || fitBoundaries.X6 > profile.Last().X);
 
-            // generate the six boundary points
-            double x1 = (rightEdgePosition + leftEdgePosition - DomainLengthE * FeatureWidth) / 2;
-            double x2 = x1 + DomainLengthA * FeatureWidth;
-            double x3 = (rightEdgePosition + leftEdgePosition - DomainLengthC * FeatureWidth) / 2;
-            double x4 = x3 + DomainLengthC * FeatureWidth;
-            double x6 = x1 + DomainLengthE * FeatureWidth;
-            double x5 = x6 - DomainLengthA * FeatureWidth;
-            ProfileTooShort = (x1 < profile.First().X || x6 > profile.Last().X);
+            //if (leftEdgePosition > rightEdgePosition)
+            //{
+            //    double tempEdge = rightEdgePosition;
+            //    rightEdgePosition = leftEdgePosition;
+            //    leftEdgePosition = tempEdge;
+            //}
 
             // generate array for the reference part (A, B)
             List<Point3D> domainAB = new List<Point3D>();
             foreach (Point3D point in profile)
             {
-                double x = point.X;
-                if (((x1 <= x) && (x2 >= x)) || ((x5 <= x) && (x6 >= x)))
+                if (((fitBoundaries.X1 <= point.X) && (fitBoundaries.X2 >= point.X)) || ((fitBoundaries.X5 <= point.X) && (fitBoundaries.X6 >= point.X)))
                 {
                     domainAB.Add(new Point3D(point));
                 }
@@ -259,8 +203,7 @@ namespace StepHeight
             List<Point3D> domainC = new List<Point3D>();
             foreach (Point3D point in profile)
             {
-                double x = point.X;
-                if ((x3 <= x) && (x4 >= x))
+                if ((fitBoundaries.X3 <= point.X) && (fitBoundaries.X4 >= point.X))
                 {
                     domainC.Add(new Point3D(point));
                 }
@@ -372,8 +315,8 @@ namespace StepHeight
 
         private void FitEdge(Point3D[] profile, double edgePosition)
         {
-            FeatureWidth = 0.0;
-            Console.WriteLine("FitEdge() not yet implemented!");
+            fitBoundaries.GenerateBoundaries(edgePosition, edgePosition);
+            ProfileTooShort = (fitBoundaries.X1 < profile.First().X || fitBoundaries.X6 > profile.Last().X);
             throw new NotImplementedException();
         }
 
@@ -447,7 +390,6 @@ namespace StepHeight
             NumberOfFitPoints = 0;
             ProfileTooShort = false;
             RangeOfResiduals = double.NaN;
-            FeatureWidth = double.NaN;
             Yposition = double.NaN;
             Height = double.NaN;
             Pt = double.NaN;
