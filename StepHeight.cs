@@ -16,7 +16,6 @@ namespace StepHeight
         {
             const string microMeter = "µm"; // or "um"
             ScanFieldTopology scanFieldTopology = ScanFieldTopology.Unknown;
-            // not clear what happens in multithread environments
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             // parse command line arguments
@@ -205,6 +204,13 @@ namespace StepHeight
             ConsoleUI.WriteLine($"W3: {options.W3}");
             ConsoleUI.WriteLine($"Position of left feature edge: {options.LeftX} {microMeter}");
             ConsoleUI.WriteLine($"Position of right feature edge: {options.RightX} {microMeter}");
+            if(options.Type == FeatureType.A1TrapGroove || options.Type == FeatureType.A1TrapRidge)
+            {
+                ConsoleUI.WriteLine($"Position of left wall edge: {options.LeftU} {microMeter}");
+                ConsoleUI.WriteLine($"Position of right wall edge: {options.RightU} {microMeter}");
+            }
+            ConsoleUI.WriteLine($"Position of left wall edge: {options.LeftU} {microMeter}");
+            ConsoleUI.WriteLine($"Position of right wall edge: {options.RightU} {microMeter}");
             ConsoleUI.WriteLine($"y-value of first profile {options.Y0} {microMeter}");
             if (options.DeltaY > bcrReaderA.RasterData.ScanFieldDimensionY * 1e6)
                 ConsoleUI.WriteLine($"Width of y-band to evaluate: infinity");
@@ -226,7 +232,7 @@ namespace StepHeight
                 if (y >= yStart && y <= yEnd)
                 {
                     Point3D[] currentProfile = ExtractProfile(profileIndex, bcrReaderA, bcrReaderB, bcrReaderC);
-                    fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6);
+                    fitVerticalStandard.FitProfile(currentProfile, options.LeftX * 1e-6, options.RightX * 1e-6, options.LeftU * 1e-6, options.RightU * 1e-6);
                     if (fitVerticalStandard.Status == FitStatus.BadEdgePosition)
                         ConsoleUI.ErrorExit("!Feature edge location outside of profile", 30);
                     if(fitVerticalStandard.Status != FitStatus.Success)
@@ -284,6 +290,11 @@ namespace StepHeight
             reportStringBuilder.AppendLine($"W3                        = {options.W3}");
             reportStringBuilder.AppendLine($"FirstFeatureEdge          = {options.LeftX} {microMeter}");
             reportStringBuilder.AppendLine($"SecondFeatureEdge         = {options.RightX} {microMeter}");
+            if (options.Type == FeatureType.A1TrapGroove || options.Type == FeatureType.A1TrapRidge)
+            {
+                reportStringBuilder.AppendLine($"FirstWallEdge             = {options.LeftU} {microMeter}");
+                reportStringBuilder.AppendLine($"SecondWallEdge            = {options.RightU} {microMeter}");
+            }
             reportStringBuilder.AppendLine($"FeatureWidth              = {featureWidth * 1e6} {microMeter}");
             reportStringBuilder.AppendLine($"FirstProfilePosition      = {options.Y0} {microMeter}");
             if (options.DeltaY > bcrReaderA.RasterData.ScanFieldDimensionY * 1e6)
