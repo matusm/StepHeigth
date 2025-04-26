@@ -409,6 +409,8 @@ namespace StepHeight
                 case FeatureType.A1Ridge:
                 case FeatureType.FallingEdge:
                 case FeatureType.RisingEdge:
+                case FeatureType.A1TrapGroove:
+                case FeatureType.A1TrapRidge:
                     // output for rectangular (flat toped) features
                     retString = $"{profileIndex,5} {y,7:F1} {h,10:F4} {pt,10:F4} {res,10:F4}";
                     break;

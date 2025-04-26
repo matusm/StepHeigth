@@ -72,9 +72,9 @@ namespace StepHeight
                 case 4:
                     return FeatureType.A2Ridge;
                 case 5:
-                    return FeatureType.A1TrapGroove;
-                case 6:
                     return FeatureType.A1TrapRidge;
+                case 6:
+                    return FeatureType.A1TrapGroove;
                 case 7:
                     return FeatureType.RisingEdge;
                 case 8:
