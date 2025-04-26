@@ -14,7 +14,7 @@
         private double DomainLengthE { get; }   // normalized overall evaluation length (3)
 
         public double FeatureWidth { get; private set; } = double.NaN; // absolute feature width (in m)
-        public double WallWidth { get; private set; } = double.NaN; // absolute wall width (in m)
+        public double WallWidth { get; private set; } = double.NaN; // width of both inclined walls (in m)
         // the six boundary points:
         public double X1 { get; private set; } = double.NaN; // start of the left reference domain
         public double X2 { get; private set; } = double.NaN; // end of the left reference domain
@@ -29,11 +29,11 @@
         {
             (double El, double Er, double Wl, double Wr) t = SortPositions(leftEdgePosition, rightEdgePosition, leftWallPosition, rightWallPosition);
             FeatureWidth = t.Er - t.El; // sets the unit for the relative domain lengths.
-            WallWidth = t.Wr - t.Wl;
+            WallWidth = t.Wr - t.Wl - FeatureWidth;
             double lengthE = DomainLengthE * FeatureWidth;
             double lengthA = DomainLengthA * FeatureWidth;
             double lengthC = DomainLengthC * FeatureWidth;
-            double lengthEAll = lengthE + WallWidth - FeatureWidth;
+            double lengthEAll = lengthE + WallWidth;
             double lengthRef = (lengthE - FeatureWidth) / 2.0;
 
             X1 = t.Wl - lengthRef;
