@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using Bev.IO.BcrReader;
@@ -130,7 +129,7 @@ namespace StepHeight
             }
             #endregion
 
-            #region Set offset for the scan field
+            #region Set offsets for the disjoint scan fields
             if (scanFieldTopology == ScanFieldTopology.Single)
             {
                 bcrReaderA.SetXOffset(0.0);
@@ -293,7 +292,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine(KeyValueToString("ZScale", $"{bcrReaderA.ZScale * 1e6} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("ScanFieldWidth", $"{scanFieldWidth * 1e6:F2} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("ScanFieldHeight", $"{bcrReaderA.RasterData.ScanFieldDimensionY * 1e6} {microMeter}"));
-            reportStringBuilder.AppendLine($"# ===== Fit parameters =====================================");
+            reportStringBuilder.AppendLine($"# ===== Fit parameters ========================================");
             reportStringBuilder.AppendLine(KeyValueToString("FeatureType", $"{options.Type}"));
             reportStringBuilder.AppendLine(KeyValueToString("W1", $"{options.W1}"));
             reportStringBuilder.AppendLine(KeyValueToString("W2", $"{options.W2}"));
@@ -313,7 +312,7 @@ namespace StepHeight
             else
                 reportStringBuilder.AppendLine(KeyValueToString("EvaluationWidth", $"{options.DeltaY} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("ThresholdResiduals", $"{options.MaxSpan} {microMeter}"));
-            reportStringBuilder.AppendLine($"# ===== Fit results ========================================");
+            reportStringBuilder.AppendLine($"# ===== Fit results ===========================================");
             reportStringBuilder.AppendLine(KeyValueToString("NumberOfValidProfiles", $"{fitStatistics.NumberOfSamples}"));
             reportStringBuilder.AppendLine(KeyValueToString("NumberOfDiscardedProfiles", $"{numberDiscardedProfiles}"));
             reportStringBuilder.AppendLine(KeyValueToString("AverageHeight", $"{fitStatistics.AverageHeight * 1e6:F5} {microMeter}"));
@@ -326,7 +325,7 @@ namespace StepHeight
                 reportStringBuilder.AppendLine(KeyValueToString("AverageRadius", $"{fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}"));
                 reportStringBuilder.AppendLine(KeyValueToString("RangeOfRadii", $"{fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}"));
             }
-            reportStringBuilder.AppendLine($"# ===== Columns ============================================");
+            reportStringBuilder.AppendLine($"# ===== Columns ===============================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
             reportStringBuilder.AppendLine($"# 2 : Profile position / {microMeter}");
             reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
@@ -338,7 +337,7 @@ namespace StepHeight
                 reportStringBuilder.AppendLine($"# 6 : Radius / {microMeter}");
                 reportStringBuilder.AppendLine($"# 7 : Asymmetry index");
             }
-            reportStringBuilder.AppendLine($"# ==========================================================");
+            reportStringBuilder.AppendLine($"# =============================================================");
             reportStringBuilder.Append(fittedProfilsResult);
             #endregion
 
