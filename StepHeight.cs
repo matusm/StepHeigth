@@ -2,11 +2,13 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using Bev.IO.BcrReader;
 using Bev.SurfaceRasterData;
 using Bev.UI;
+using CommandLine.Text;
 
 namespace StepHeight
 {
@@ -204,7 +206,7 @@ namespace StepHeight
             ConsoleUI.WriteLine($"W3: {options.W3}");
             ConsoleUI.WriteLine($"Position of left feature edge: {options.LeftX} {microMeter}");
             ConsoleUI.WriteLine($"Position of right feature edge: {options.RightX} {microMeter}");
-            if(options.Type == FeatureType.A1TrapGroove || options.Type == FeatureType.A1TrapRidge)
+            if(options.Type == FeatureType.A1TrapezoidalGroove || options.Type == FeatureType.A1TrapezoidalRidge)
             {
                 ConsoleUI.WriteLine($"Position of left wall edge: {options.LeftU} {microMeter}");
                 ConsoleUI.WriteLine($"Position of right wall edge: {options.RightU} {microMeter}");
@@ -225,7 +227,6 @@ namespace StepHeight
             int numberDiscardedProfiles = 0;
             FitStatistics fitStatistics = new FitStatistics(fitVerticalStandard);
             StringBuilder fittedProfilsResult = new StringBuilder();
-            double featureWidth = double.NaN;
             for (int profileIndex = 0; profileIndex < bcrReaderA.NumProfiles; profileIndex++)
             {
                 double y = bcrReaderA.GetPointFor(0, profileIndex).Y;
@@ -241,7 +242,6 @@ namespace StepHeight
                         numberDiscardedProfiles++;
                         break;
                     }
-                    featureWidth = fitVerticalStandard.FeatureWidth; // for later use
                     if (fitVerticalStandard.RangeOfResiduals < options.MaxSpan * 1e-6)
                     {
                         string resultLine = FormattedStringForFitResult(profileIndex, fitVerticalStandard);
@@ -270,52 +270,63 @@ namespace StepHeight
             #endregion
 
             #region Collate calibration (output) data
+
             StringBuilder reportStringBuilder = new StringBuilder();
-            reportStringBuilder.AppendLine($"# Output of {ConsoleUI.Title}, version {ConsoleUI.Version}");
-            reportStringBuilder.AppendLine($"InputFile                 = {inputFileName}");
-            reportStringBuilder.AppendLine($"DisjointScanFields        = {numberPatches}");
-            reportStringBuilder.AppendLine($"ManufacID                 = {bcrReaderA.ManufacID}");
-            reportStringBuilder.AppendLine($"UserComment               = {options.UserComment}");
-            reportStringBuilder.AppendLine($"NumberOfPointsPerProfile  = {pointsPerProfile}");
-            reportStringBuilder.AppendLine($"NumberOfProfiles          = {bcrReaderA.NumProfiles}");
-            reportStringBuilder.AppendLine($"XScale                    = {bcrReaderA.XScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"YScale                    = {bcrReaderA.YScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ZScale                    = {bcrReaderA.ZScale * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldWidth            = {scanFieldWidth * 1e6:F2} {microMeter}");
-            reportStringBuilder.AppendLine($"ScanFieldHeight           = {bcrReaderA.RasterData.ScanFieldDimensionY * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"# Fit parameters =====================================");
-            reportStringBuilder.AppendLine($"FeatureType               = {options.Type}");
-            reportStringBuilder.AppendLine($"W1                        = {options.W1}");
-            reportStringBuilder.AppendLine($"W2                        = {options.W2}");
-            reportStringBuilder.AppendLine($"W3                        = {options.W3}");
-            reportStringBuilder.AppendLine($"FirstFeatureEdge          = {options.LeftX} {microMeter}");
-            reportStringBuilder.AppendLine($"SecondFeatureEdge         = {options.RightX} {microMeter}");
-            if (options.Type == FeatureType.A1TrapGroove || options.Type == FeatureType.A1TrapRidge)
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "SampleIdentifier"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "SampleSpecies"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "SampleSpecification"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "ManufacID"));
+            reportStringBuilder.AppendLine(KeyValueToString("UserComment", options.UserComment));
+            reportStringBuilder.AppendLine(KeyValueToString("InputFile", inputFileName));
+            reportStringBuilder.AppendLine(KeyValueToString("ConvertedBy", $"{HeadingInfo.Default}"));
+            reportStringBuilder.AppendLine(KeyValueToString("BcrReader", $"{typeof(BcrReader).Assembly.GetName().Name} {typeof(BcrReader).Assembly.GetName().Version}"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "OperatorName"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "Organisation"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "SPMtechnique"));
+            reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "Probe"));
+            reportStringBuilder.AppendLine(KeyValueToString("SampleTemperature", $"{bcrReaderA.SampleTemperature:F3} °C"));
+            reportStringBuilder.AppendLine(KeyValueToString("DisjointScanFields", $"{numberPatches}"));
+            reportStringBuilder.AppendLine(KeyValueToString("NumberOfPointsPerProfile", $"{pointsPerProfile}"));
+            reportStringBuilder.AppendLine(KeyValueToString("NumberOfProfiles", $"{bcrReaderA.NumProfiles}"));
+            reportStringBuilder.AppendLine(KeyValueToString("XScale", $"{bcrReaderA.XScale * 1e6} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("YScale", $"{bcrReaderA.YScale * 1e6} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("ZScale", $"{bcrReaderA.ZScale * 1e6} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("ScanFieldWidth", $"{scanFieldWidth * 1e6:F2} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("ScanFieldHeight", $"{bcrReaderA.RasterData.ScanFieldDimensionY * 1e6} {microMeter}"));
+            reportStringBuilder.AppendLine($"# ===== Fit parameters =====================================");
+            reportStringBuilder.AppendLine(KeyValueToString("FeatureType", $"{options.Type}"));
+            reportStringBuilder.AppendLine(KeyValueToString("W1", $"{options.W1}"));
+            reportStringBuilder.AppendLine(KeyValueToString("W2", $"{options.W2}"));
+            reportStringBuilder.AppendLine(KeyValueToString("W3", $"{options.W3}"));
+            reportStringBuilder.AppendLine(KeyValueToString("FirstFeatureEdge", $"{options.LeftX} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("SecondFeatureEdge", $"{options.RightX} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("FeatureWidth", $"{fitVerticalStandard.FeatureWidth * 1e6} {microMeter}"));
+            if (options.Type == FeatureType.A1TrapezoidalGroove || options.Type == FeatureType.A1TrapezoidalRidge)
             {
-                reportStringBuilder.AppendLine($"FirstWallEdge             = {options.LeftU} {microMeter}");
-                reportStringBuilder.AppendLine($"SecondWallEdge            = {options.RightU} {microMeter}");
+                reportStringBuilder.AppendLine(KeyValueToString("FirstWallEdge", $"{options.LeftU} {microMeter}"));
+                reportStringBuilder.AppendLine(KeyValueToString("SecondWallEdge", $"{options.RightU} {microMeter}"));
+                reportStringBuilder.AppendLine(KeyValueToString("WallWidth", $"{fitVerticalStandard.WallWidth * 1e6} {microMeter}"));
             }
-            reportStringBuilder.AppendLine($"FeatureWidth              = {featureWidth * 1e6} {microMeter}");
-            reportStringBuilder.AppendLine($"FirstProfilePosition      = {options.Y0} {microMeter}");
+            reportStringBuilder.AppendLine(KeyValueToString("FirstProfilePosition", $"{options.Y0} {microMeter}"));
             if (options.DeltaY > bcrReaderA.RasterData.ScanFieldDimensionY * 1e6)
-                reportStringBuilder.AppendLine($"EvaluationWidth           = infinity");
+                reportStringBuilder.AppendLine(KeyValueToString("EvaluationWidth", $"infinity"));
             else
-                reportStringBuilder.AppendLine($"EvaluationWidth           = {options.DeltaY} {microMeter}");
-            reportStringBuilder.AppendLine($"ThresholdResiduals        = {options.MaxSpan} {microMeter}");
-            reportStringBuilder.AppendLine($"# Fit results =======================================");
-            reportStringBuilder.AppendLine($"NumberOfValidProfiles     = {fitStatistics.NumberOfSamples}");
-            reportStringBuilder.AppendLine($"NumberOfDiscardedProfiles = {numberDiscardedProfiles}");
-            reportStringBuilder.AppendLine($"AverageHeight             = {fitStatistics.AverageHeight * 1e6:F5} {microMeter}");
-            reportStringBuilder.AppendLine($"RangeOfHeights            = {fitStatistics.HeightRange * 1e6:F5} {microMeter}");
-            reportStringBuilder.AppendLine($"AveragePt                 = {fitStatistics.AveragePt * 1e6:F5} {microMeter}");
-            reportStringBuilder.AppendLine($"RangeOfPt                 = {fitStatistics.PtRange * 1e6:F5} {microMeter}");
+                reportStringBuilder.AppendLine(KeyValueToString("EvaluationWidth", $"{options.DeltaY} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("ThresholdResiduals", $"{options.MaxSpan} {microMeter}"));
+            reportStringBuilder.AppendLine($"# ===== Fit results ========================================");
+            reportStringBuilder.AppendLine(KeyValueToString("NumberOfValidProfiles", $"{fitStatistics.NumberOfSamples}"));
+            reportStringBuilder.AppendLine(KeyValueToString("NumberOfDiscardedProfiles", $"{numberDiscardedProfiles}"));
+            reportStringBuilder.AppendLine(KeyValueToString("AverageHeight", $"{fitStatistics.AverageHeight * 1e6:F5} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("RangeOfHeights", $"{fitStatistics.HeightRange * 1e6:F5} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("AveragePt", $"{fitStatistics.AveragePt * 1e6:F5} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("RangeOfPt", $"{fitStatistics.PtRange * 1e6:F5} {microMeter}"));
             if (options.Type == FeatureType.A2Groove ||
                 options.Type == FeatureType.A2Ridge)
             {
-                reportStringBuilder.AppendLine($"AverageRadius             = {fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}");
-                reportStringBuilder.AppendLine($"RangeOfRadii              = {fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}");
+                reportStringBuilder.AppendLine(KeyValueToString("AverageRadius", $"{fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}"));
+                reportStringBuilder.AppendLine(KeyValueToString("RangeOfRadii", $"{fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}"));
             }
-            reportStringBuilder.AppendLine($"# Columns ============================================");
+            reportStringBuilder.AppendLine($"# ===== Columns ============================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
             reportStringBuilder.AppendLine($"# 2 : Profile position / {microMeter}");
             reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
@@ -327,7 +338,7 @@ namespace StepHeight
                 reportStringBuilder.AppendLine($"# 6 : Radius / {microMeter}");
                 reportStringBuilder.AppendLine($"# 7 : Asymmetry index");
             }
-            reportStringBuilder.AppendLine($"#=====================================================");
+            reportStringBuilder.AppendLine($"# ==========================================================");
             reportStringBuilder.Append(fittedProfilsResult);
             #endregion
 
@@ -374,6 +385,34 @@ namespace StepHeight
 
         //=====================================================================
 
+        private static string KeyValueToString(string key, string value)
+        {
+            string retString = string.Empty;
+            if (value != string.Empty)
+            {
+                retString = $"{key,-25} = {value}";
+            }
+            else
+            {
+                retString = $"{key,-25} = ---";
+            }
+            return retString;
+        }
+
+        //=====================================================================
+
+        private static string MetaDataToString(BcrReader bcrReader, string key)
+        {
+            Dictionary<string, string> meta = bcrReader.MetaData;
+            string value = string.Empty;
+            string retString = string.Empty;
+            if (meta.ContainsKey(key))
+                value = meta[key];
+            return KeyValueToString(key, value);
+        }
+
+        //=====================================================================
+
         private static Point3D[] ExtractProfile(int profileIndex, BcrReader bcrReaderA, BcrReader bcrReaderB, BcrReader bcrReaderC)
         {
             if (bcrReaderA == null)
@@ -409,8 +448,8 @@ namespace StepHeight
                 case FeatureType.A1Ridge:
                 case FeatureType.FallingEdge:
                 case FeatureType.RisingEdge:
-                case FeatureType.A1TrapGroove:
-                case FeatureType.A1TrapRidge:
+                case FeatureType.A1TrapezoidalGroove:
+                case FeatureType.A1TrapezoidalRidge:
                     // output for rectangular (flat toped) features
                     retString = $"{profileIndex,5} {y,7:F1} {h,10:F4} {pt,10:F4} {res,10:F4}";
                     break;

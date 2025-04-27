@@ -27,6 +27,7 @@ namespace StepHeight
         public double DomainLengthE { get; }   // normalized overall evaluation length (3)
         // computed properties after calling FitProfile()
         public double FeatureWidth => fitBoundaries.FeatureWidth;   // feature width, W
+        public double WallWidth => fitBoundaries.WallWidth;         // width of both inclined walls, 
         public double Yposition { get; private set; }               // position of profile in transverse direction
         public double Height { get; private set; }                  // height of the feature as obtained by fit (the measurand)
         public double Pt { get; private set; }                      // Pt as obtained by fit
@@ -69,8 +70,8 @@ namespace StepHeight
                 case FeatureType.RisingEdge:
                     FitEdge(shiftedProfile, leftEdgePosition - featureCenter);
                     break;
-                case FeatureType.A1TrapGroove:
-                case FeatureType.A1TrapRidge:
+                case FeatureType.A1TrapezoidalGroove:
+                case FeatureType.A1TrapezoidalRidge:
                     FitA1Trap(shiftedProfile, leftEdgePosition - featureCenter, rightEdgePosition - featureCenter, leftWallPosition - featureCenter, rightWallPosition - featureCenter);
                     break;
             }
@@ -356,9 +357,9 @@ namespace StepHeight
                     return +1;
                 case FeatureType.A2Ridge:
                     return -1;
-                case FeatureType.A1TrapGroove:
+                case FeatureType.A1TrapezoidalGroove:
                     return +1;
-                case FeatureType.A1TrapRidge:
+                case FeatureType.A1TrapezoidalRidge:
                     return -1;
                 case FeatureType.RisingEdge:
                     return -1;

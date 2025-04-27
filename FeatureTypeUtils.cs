@@ -14,9 +14,9 @@
                     return "ISO 5436-1 Type A2 (cylindrical groove)"; //+
                 case FeatureType.A2Ridge:
                     return "Inverted ISO 5436-1 Type A2 (cylindrical ridge)"; //-
-                case FeatureType.A1TrapGroove:
+                case FeatureType.A1TrapezoidalGroove:
                     return "ISO 5436-1 Type A1 (trapezoidal groove)"; //+
-                case FeatureType.A1TrapRidge:
+                case FeatureType.A1TrapezoidalRidge:
                     return "Inverted ISO 5436-1 Type A1 (trapezoidal ridge)"; //-
                 case FeatureType.RisingEdge:
                     return "Single edge (low->high)"; //-
