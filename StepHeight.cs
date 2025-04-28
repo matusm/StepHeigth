@@ -210,8 +210,6 @@ namespace StepHeight
                 ConsoleUI.WriteLine($"Position of left wall edge: {options.LeftU} {microMeter}");
                 ConsoleUI.WriteLine($"Position of right wall edge: {options.RightU} {microMeter}");
             }
-            ConsoleUI.WriteLine($"Position of left wall edge: {options.LeftU} {microMeter}");
-            ConsoleUI.WriteLine($"Position of right wall edge: {options.RightU} {microMeter}");
             ConsoleUI.WriteLine($"y-value of first profile {options.Y0} {microMeter}");
             if (options.DeltaY > bcrReaderA.RasterData.ScanFieldDimensionY * 1e6)
                 ConsoleUI.WriteLine($"Width of y-band to evaluate: infinity");
@@ -268,7 +266,7 @@ namespace StepHeight
 
             #endregion
 
-            #region Collate calibration (output) data
+            #region Collate calibration (output) results
 
             StringBuilder reportStringBuilder = new StringBuilder();
             reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "SampleIdentifier"));
@@ -277,7 +275,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "ManufacID"));
             reportStringBuilder.AppendLine(KeyValueToString("UserComment", options.UserComment));
             reportStringBuilder.AppendLine(KeyValueToString("InputFile", inputFileName));
-            reportStringBuilder.AppendLine(KeyValueToString("ConvertedBy", $"{HeadingInfo.Default}"));
+            reportStringBuilder.AppendLine(KeyValueToString("EvaluatedBy", $"{HeadingInfo.Default}"));
             reportStringBuilder.AppendLine(KeyValueToString("BcrReader", $"{typeof(BcrReader).Assembly.GetName().Name} {typeof(BcrReader).Assembly.GetName().Version}"));
             reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "OperatorName"));
             reportStringBuilder.AppendLine(MetaDataToString(bcrReaderA, "Organisation"));
@@ -449,7 +447,7 @@ namespace StepHeight
                 case FeatureType.RisingEdge:
                 case FeatureType.A1TrapezoidalGroove:
                 case FeatureType.A1TrapezoidalRidge:
-                    // output for rectangular (flat toped) features
+                    // output for flat toped features
                     retString = $"{profileIndex,5} {y,7:F1} {h,10:F4} {pt,10:F4} {res,10:F4}";
                     break;
                 case FeatureType.A2Groove:
