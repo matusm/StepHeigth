@@ -314,21 +314,21 @@ namespace StepHeight
             reportStringBuilder.AppendLine(KeyValueToString("NumberOfValidProfiles", $"{fitStatistics.NumberOfSamples}"));
             reportStringBuilder.AppendLine(KeyValueToString("NumberOfDiscardedProfiles", $"{numberDiscardedProfiles}"));
             reportStringBuilder.AppendLine(KeyValueToString("AverageHeight", $"{fitStatistics.AverageHeight * 1e6:F5} {microMeter}"));
-            reportStringBuilder.AppendLine(KeyValueToString("RangeOfHeights", $"{fitStatistics.HeightRange * 1e6:F5} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("SpanOfHeights", $"{fitStatistics.HeightRange * 1e6:F5} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("AveragePt", $"{fitStatistics.AveragePt * 1e6:F5} {microMeter}"));
-            reportStringBuilder.AppendLine(KeyValueToString("RangeOfPt", $"{fitStatistics.PtRange * 1e6:F5} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("SpanOfPt", $"{fitStatistics.PtRange * 1e6:F5} {microMeter}"));
             if (options.Type == FeatureType.A2Groove ||
                 options.Type == FeatureType.A2Ridge)
             {
                 reportStringBuilder.AppendLine(KeyValueToString("AverageRadius", $"{fitStatistics.AverageA2Radius * 1e6:F1} {microMeter}"));
-                reportStringBuilder.AppendLine(KeyValueToString("RangeOfRadii", $"{fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}"));
+                reportStringBuilder.AppendLine(KeyValueToString("SpanOfRadii", $"{fitStatistics.A2RadiusRange * 1e6:F1} {microMeter}"));
             }
             reportStringBuilder.AppendLine($"# ===== Columns ===============================================");
             reportStringBuilder.AppendLine($"# 1 : Profile index");
             reportStringBuilder.AppendLine($"# 2 : Profile position / {microMeter}");
             reportStringBuilder.AppendLine($"# 3 : Feature height/depth / {microMeter}");
             reportStringBuilder.AppendLine($"# 4 : Pt / {microMeter}");
-            reportStringBuilder.AppendLine($"# 5 : Range of residuals / {microMeter}");
+            reportStringBuilder.AppendLine($"# 5 : Span of residuals / {microMeter}");
             if (options.Type == FeatureType.A2Groove ||
                 options.Type == FeatureType.A2Ridge)
             {
