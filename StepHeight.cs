@@ -315,6 +315,7 @@ namespace StepHeight
             reportStringBuilder.AppendLine(KeyValueToString("NumberOfDiscardedProfiles", $"{numberDiscardedProfiles}"));
             reportStringBuilder.AppendLine(KeyValueToString("AverageHeight", $"{fitStatistics.AverageHeight * 1e6:F5} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("SpanOfHeights", $"{fitStatistics.HeightRange * 1e6:F5} {microMeter}"));
+            reportStringBuilder.AppendLine(KeyValueToString("StdDevOfHeights", $"{fitStatistics.HeightStdDev * 1e6:F5} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("AveragePt", $"{fitStatistics.AveragePt * 1e6:F5} {microMeter}"));
             reportStringBuilder.AppendLine(KeyValueToString("SpanOfPt", $"{fitStatistics.PtRange * 1e6:F5} {microMeter}"));
             if (options.Type == FeatureType.A2Groove ||

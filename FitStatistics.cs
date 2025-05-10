@@ -23,6 +23,7 @@ namespace StepHeight
         public int NumberOfSamples => (int)heightPod.SampleSize;
         public double AverageHeight => heightPod.AverageValue;
         public double HeightRange => heightPod.Range;
+        public double HeightStdDev => heightPod.StandardDeviation;
         public double AveragePt => ptPod.AverageValue;
         public double PtRange => ptPod.Range;
         public double AverageA2Radius => radiusPod.AverageValue;
