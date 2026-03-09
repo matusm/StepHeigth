@@ -67,7 +67,7 @@ StepHeight inputfile [outputfile] [plotfile] [options]
 6: falling step
 
 ## Multiple File Input
-Some scan techniques do not work with very steep flanks, so the bottom and the reference surface must be recorded separately. By using the `--multifile` option it is possible to handle this case. The scan field consists of separate files. Some conditions must be fulfilled:
+Some scan techniques do not work with very steep flanks. The bottom and the reference surface must be recorded separately and the scan field consists of separate files. By using the `--multifile` option it is possible to handle this case. Some conditions must be fulfilled:
 
 * The file names must end with A, B and C, respectively.
 
@@ -75,17 +75,14 @@ Some scan techniques do not work with very steep flanks, so the bottom and the r
 
 * All files must have the key `ScanFieldOriginX` in their trailer section. The coresponding value must be in m. This value is used to reference the separate scan fields.
 
-* When using Nmm2Bcr it is essential that the scan were performed in the x-axis of the NMM-1. This means the samples must be oriented accordingly.
-
-## Dependencies  
-
-At.Matus.StatisticPod: https://github.com/matusm/At.Matus.StatisticPod
-
-Bev.SurfaceRasterData: https://github.com/matusm/Bev.SurfaceRasterData  
-
-Bev.IO.BcrReader: https://github.com/matusm/Bev.IO.BcrReader 
-
-CommandLineParser: https://github.com/commandlineparser/commandline 
+* When using [Nmm2Bcr](https://github.com/matusm/Nmm2Bcr) it is essential that the scan were performed in the x-axis of the NMM-1. This means the samples must be oriented accordingly.
 
 
+## Installation
+If you do not want to build the application from the source code you can use the released binaries. Just copy the .exe and the .dll files to a directory of your choice. This direcory should be included in the user's PATH variable.
 
+## Dependencies and Acknowledgments
+* [At.Matus.IO.NmmReader](https://github.com/matusm/At.Matus.IO.NmmReader)  
+* [At.Matus.StatisticPod](https://github.com/matusm/At.Matus.StatisticPod)
+* [CommandLineParser](https://github.com/commandlineparser/commandline)
+* [Math.NET numerics](https://numerics.mathdotnet.com)
