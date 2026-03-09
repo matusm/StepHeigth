@@ -37,21 +37,21 @@
     <ExternalConsole>false</ExternalConsole>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="At.Matus.IO.BcrReader">
+      <HintPath>..\At.Matus.IO.BcrReader\At.Matus.IO.BcrReader\bin\Release\At.Matus.IO.BcrReader.dll</HintPath>
+    </Reference>
     <Reference Include="At.Matus.StatisticPod">
       <HintPath>..\At.Matus.StatisticPod\bin\Release\At.Matus.StatisticPod.dll</HintPath>
     </Reference>
-    <Reference Include="Bev.UI">
-      <HintPath>..\Bev.UI.ConsoleUI\Bev.UI\bin\Release\Bev.UI.dll</HintPath>
+    <Reference Include="At.Matus.SurfaceRasterData">
+      <HintPath>..\At.Matus.SurfaceRasterData\At.Matus.SurfaceRasterData\bin\Release\At.Matus.SurfaceRasterData.dll</HintPath>
+    </Reference>
+    <Reference Include="At.Matus.UI.ConsoleUI">
+      <HintPath>..\At.Matus.UI.ConsoleUI\At.Matus.UI.ConsoleUI\bin\Release\At.Matus.UI.ConsoleUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="Bev.IO.BcrReader">
-      <HintPath>..\Bev.IO.BcrReader\bin\Release\Bev.IO.BcrReader.dll</HintPath>
-    </Reference>
     <Reference Include="CommandLine">
       <HintPath>packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
-    </Reference>
-    <Reference Include="Bev.SurfaceRasterData">
-      <HintPath>..\Bev.SurfaceRasterData\bin\Release\Bev.SurfaceRasterData.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
