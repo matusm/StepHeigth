@@ -54,17 +54,17 @@ StepHeight inputfile [outputfile] [plotfile] [options]
 
 `--type (-t)` : Feature type to be fitted, supported values are:
 
-1: ISO A1 (rectangular ridge)
+1: ISO A1 - rectangular ridge
 
-2: ISO A2 (cylindrical groove)
+2: ISO A2 - cylindrical groove
 
-3: ISO A1 (rectangular groove)
+3: ISO A1 - rectangular groove
 
-4: ISO A2 (cylindrical ridge)
+4: ISO A2 - cylindrical ridge
 
-5: rising step
+5: rising step (currently not supported)
 
-6: falling step
+6: falling step (currently not supported)
 
 ## Multiple File Input
 Some scan techniques do not work with very steep flanks. The bottom and the reference surface must be recorded separately and the scan field consists of separate files. By using the `--multifile` option it is possible to handle this case. Some conditions must be fulfilled:
@@ -82,7 +82,8 @@ Some scan techniques do not work with very steep flanks. The bottom and the refe
 If you do not want to build the application from the source code you can use the released binaries. Just copy the .exe and the .dll files to a directory of your choice. This direcory should be included in the user's PATH variable.
 
 ## Dependencies and Acknowledgments
-* [At.Matus.IO.NmmReader](https://github.com/matusm/At.Matus.IO.NmmReader)  
+* [At.Matus.IO.BcrReader](https://github.com/matusm/At.Matus.IO.BcrReader)  
+* [At.Matus.UI.ConsoleUI](https://github.com/matusm/At.Matus.UI.ConsoleUI) 
+* [At.Matus.SurfaceRasterData](https://github.com/matusm/At.Matus.SurfaceRasterData)  
 * [At.Matus.StatisticPod](https://github.com/matusm/At.Matus.StatisticPod)
 * [CommandLineParser](https://github.com/commandlineparser/commandline)
-* [Math.NET numerics](https://numerics.mathdotnet.com)
